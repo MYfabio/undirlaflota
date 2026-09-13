@@ -54,13 +54,18 @@ railway up
 railway domain
 ```
 
-### 4. DNS (registrador del domini .cat)
+### 4. DNS (registrador del domini .cat) · valors reals generats per Railway (13/09/2026)
 | Tipus | Nom | Valor |
 |---|---|---|
-| CNAME | `www` | `<subdomini>.up.railway.app` |
-| A / ALIAS | `@` | segons Railway (ALIAS al CNAME, o redirecció 301 de l'arrel a www) |
+| CNAME (o ALIAS/ANAME a l'arrel) | `@` | `8la0badi.up.railway.app` |
+| TXT | `_railway-verify` | `railway-verify=c3bd07e2cf074035615b893e7c0adce41b8b2311e63c7ee0aec71469a3c8f202` |
+| CNAME | `www` | `jtmi53vq.up.railway.app` |
+| TXT | `_railway-verify.www` | `railway-verify=c1607c008b383a414382dc287a08e3acb5a2eb6db48fd91f311926ab1b10d9cd` |
 
-Railway emet el certificat TLS automàticament quan el DNS propaga.
+Si el registrador no permet CNAME a l'arrel, fes servir ALIAS/ANAME o una redirecció 301 de `undirlaflota.cat` a `www.undirlaflota.cat`.
+Railway emet el certificat TLS automàticament quan el DNS propaga. Comprova amb `railway domain status <id>`.
+
+URL provisional del servei: https://web-production-c5be8.up.railway.app
 
 ### 5. Models 3D (opcional)
 Descarrega els `.glb` a `public/models/` (veure `public/models/README.md`) i defineix `NEXT_PUBLIC_AVAILABLE_MODELS`. Sense models, el joc usa geometria procedimental.
@@ -83,4 +88,5 @@ npm run build
 - [x] Fitxa a aulaia.cat (apps.json)
 - [ ] Models .glb reals (ara procedimentals)
 - [ ] Supabase de producció configurat a Railway
-- [ ] DNS undirlaflota.cat
+- [x] Servei Railway `web` creat des de GitHub, dominis afegits (pendent DNS al registrador)
+- [ ] DNS undirlaflota.cat al registrador
