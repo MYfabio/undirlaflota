@@ -59,13 +59,13 @@ body {
   @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-bold transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100;
 }
 .btn-primary {
-  @apply btn bg-batalla text-mar-950 shadow-lg shadow-batalla/20 hover:bg-yellow-300;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-bold transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100 bg-batalla text-mar-950 shadow-lg shadow-batalla/20 hover:bg-yellow-300;
 }
 .btn-secondary {
-  @apply btn border border-mar-300/40 bg-mar-900/60 text-mar-50 hover:bg-mar-700;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-bold transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100 border border-mar-300/40 bg-mar-900/60 text-mar-50 hover:bg-mar-700;
 }
 .btn-success {
-  @apply btn bg-estrategia text-mar-950 hover:bg-teal-300;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-bold transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100 bg-estrategia text-mar-950 hover:bg-teal-300;
 }
 .card {
   @apply rounded-2xl border border-mar-300/20 bg-mar-900/60 p-5 shadow-xl backdrop-blur;
