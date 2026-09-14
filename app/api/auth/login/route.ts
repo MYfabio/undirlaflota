@@ -14,6 +14,7 @@ import {
   getSession,
   upsertPlayer,
 } from "@/lib/auth";
+import { googleConfig } from "@/lib/google";
 
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as { code?: string; username?: string };
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
 
 export async function GET() {
   const s = await getSession();
-  return NextResponse.json({ session: s ? { ...s, exp: undefined } : null });
+  return NextResponse.json({ session: s ? { ...s, exp: undefined } : null, google: googleConfig().enabled });
 }
 
 export async function DELETE() {

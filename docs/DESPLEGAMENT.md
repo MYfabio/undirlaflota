@@ -18,6 +18,9 @@ SESSION_SECRET=<cadena llarga aleatòria>
 DEMO_CLASS_CODES=DEMO-2026,ESO3A-2026        # codis acceptats també sense BD
 NEXT_PUBLIC_SITE_URL=https://enfonsarlaflota.aulaia.cat
 NODE_ENV=production
+GOOGLE_CLIENT_ID=                            # opcional: entrada amb Google
+GOOGLE_CLIENT_SECRET=
+GOOGLE_HOSTED_DOMAIN=escolaindustrial.org    # només comptes d'aquest domini
 NEXT_PUBLIC_AVAILABLE_MODELS=                # ex: carrier.glb,frigate.glb,submarine.glb,fighter.glb,bomber.glb
 ```
 
@@ -67,6 +70,11 @@ Railway emet el certificat TLS automàticament quan el DNS propaga. Comprova amb
 Subdomini d'aulaia (afegit 14/09/2026): CNAME `enfonsarlaflota` → `prvplho9.up.railway.app` i TXT `_railway-verify.enfonsarlaflota` = `railway-verify=07fdad9ce92c44771393dc5e0692c784895d5bfd29ed33bfcfccc708ab7264c0` a la zona `aulaia.cat` de cdmon.
 
 URL provisional del servei: https://web-production-c5be8.up.railway.app
+
+### 4b. Entrada amb Google (opcional)
+Google Cloud Console → APIs i serveis → Credencials → ID de client OAuth (aplicació web).
+Orígens: `https://enfonsarlaflota.aulaia.cat`, `http://localhost:3215`. URI de redirecció: `https://enfonsarlaflota.aulaia.cat/api/auth/google/callback` i `http://localhost:3215/api/auth/google/callback`.
+L'usuari de Google queda registrat a la classe automàtica `GOOGLE-<DOMINI>` (es crea sola) i pot reptar companys del mateix domini.
 
 ### 5. Models 3D (opcional)
 Descarrega els `.glb` a `public/models/` (veure `public/models/README.md`) i defineix `NEXT_PUBLIC_AVAILABLE_MODELS`. Sense models, el joc usa geometria procedimental.
