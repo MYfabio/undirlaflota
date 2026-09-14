@@ -319,6 +319,8 @@ const ca: Dict = {
   "about.codeTitle": "Vols un codi de classe?",
   "about.codeText": "Els codis els crea el professorat a la base de dades (taula classroom_codes). Si ets docent d'un altre centre, demana l'alta a través del catàleg aulaia.cat.",
   "about.login": "Entrar amb codi",
+  "about.credits": "Crèdits dels models 3D",
+  "about.creditsText": "Models de Sketchfab amb llicència CC Attribution:",
 };
 
 const es: Dict = {
@@ -604,6 +606,8 @@ const es: Dict = {
   "about.codeTitle": "¿Quieres un código de clase?",
   "about.codeText": "Los códigos los crea el profesorado en la base de datos (tabla classroom_codes). Si eres docente de otro centro, solicita el alta a través del catálogo aulaia.cat.",
   "about.login": "Entrar con código",
+  "about.credits": "Créditos de los modelos 3D",
+  "about.creditsText": "Modelos de Sketchfab con licencia CC Attribution:",
 };
 
 const en: Dict = {
@@ -889,6 +893,8 @@ const en: Dict = {
   "about.codeTitle": "Want a class code?",
   "about.codeText": "Teachers create codes in the database (classroom_codes table). If you teach at another school, request access through the aulaia.cat catalogue.",
   "about.login": "Sign in with code",
+  "about.credits": "3D model credits",
+  "about.creditsText": "Sketchfab models under the CC Attribution licence:",
 };
 
 export const DICTS: Record<Lang, Dict> = { ca, es, en };

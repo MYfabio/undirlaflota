@@ -5,6 +5,14 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { useT } from "@/components/LangProvider";
 
+const CREDITS = [
+  { name: "USS Nimitz class aircraft carrier", author: "Larcenie Grant", url: "https://sketchfab.com/3d-models/uss-nimitz-class-aircraft-carrier-e9f23bab3bd14f34ba9e54ccd082f46d" },
+  { name: "TYPE-23 CLASS FRIGATE", author: "Muhamad Mirza Arrafi", url: "https://sketchfab.com/3d-models/type-23-class-frigate-630e1ca50133477f855ce6422a3763b9" },
+  { name: "Kilo Class Submarine", author: "Art Blender", url: "https://sketchfab.com/3d-models/kilo-class-submarine-b7b2b557ebfa422b961d44b546369b08" },
+  { name: "Low poly SU-57", author: "SIpriv", url: "https://sketchfab.com/3d-models/low-poly-su-57-b9031bc2e94947b18812ce0eca6b8345" },
+  { name: "Lowpoly B52 Stratofortress", author: "SIpriv", url: "https://sketchfab.com/3d-models/lowpoly-b52-stratofortress-b1236b165402436b92afae6a65fe3e27" },
+];
+
 /** Pàgina "Sobre l'app": context pedagògic per a docents i famílies. */
 export default function AboutPage() {
   const { t } = useT();
@@ -54,6 +62,18 @@ export default function AboutPage() {
             ))}
           </ul>
           <p className="text-sm text-mar-300/80">{t("about.docs")}</p>
+        </section>
+
+        <section className="mt-12 space-y-2">
+          <h2 className="text-2xl font-extrabold">{t("about.credits")}</h2>
+          <p className="text-sm text-mar-100/80">{t("about.creditsText")}</p>
+          <ul className="list-disc space-y-1 pl-5 text-sm text-mar-100/80">
+            {CREDITS.map((c) => (
+              <li key={c.url}>
+                <a href={c.url} target="_blank" rel="noopener" className="underline hover:text-batalla">{c.name}</a> · {c.author}
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section id="docents" className="card mt-12">

@@ -1,20 +1,17 @@
 # Models 3D (.glb)
 
-Descarrega els models (format glTF binari) i desa'ls aqui amb aquests noms:
+Descarregats de Sketchfab (llicència CC Attribution: cal citar l'autor, veure `/about`).
 
-| Fitxer | Font suggerida |
-|---|---|
-| carrier.glb | https://sketchfab.com/3d-models/uss-nimitz-class-aircraft-carrier-e9f23bab3bd14f34ba9e54ccd082f46d |
-| frigate.glb | https://sketchfab.com/3d-models/type-23-class-frigate-630e1ca50133477f855ce6422a3763b9 |
-| submarine.glb | https://sketchfab.com/3d-models/kilo-class-submarine-b7b2b557ebfa422b961d44b546369b08 |
-| fighter.glb | Sketchfab: "fighter jet free" (CC-BY) |
-| bomber.glb | Sketchfab: "bomber aircraft free" (CC-BY) |
+| Fitxer | Model | Autor | Font |
+|---|---|---|---|
+| carrier.glb | USS Nimitz class aircraft carrier | Larcenie Grant | https://sketchfab.com/3d-models/uss-nimitz-class-aircraft-carrier-e9f23bab3bd14f34ba9e54ccd082f46d |
+| frigate.glb | TYPE-23 CLASS FRIGATE | Muhamad Mirza Arrafi | https://sketchfab.com/3d-models/type-23-class-frigate-630e1ca50133477f855ce6422a3763b9 |
+| submarine.glb | Kilo Class Submarine | Art Blender | https://sketchfab.com/3d-models/kilo-class-submarine-b7b2b557ebfa422b961d44b546369b08 |
+| fighter.glb | Low poly SU-57 | SIpriv | https://sketchfab.com/3d-models/low-poly-su-57-b9031bc2e94947b18812ce0eca6b8345 |
+| bomber.glb | Lowpoly B52 Stratofortress | SIpriv | https://sketchfab.com/3d-models/lowpoly-b52-stratofortress-b1236b165402436b92afae6a65fe3e27 |
 
-Sketchfab requereix compte per descarregar. Comprova la llicencia (CC-BY: cita l'autor a app/about).
-Recomanacio: < 2 MB per model (usa gltf-transform o Blender per simplificar).
+S'activen amb la variable d'entorn:
 
-Despres, activa'ls amb la variable d'entorn:
+    NEXT_PUBLIC_AVAILABLE_MODELS=carrier.glb,frigate.glb,submarine.glb,fighter.glb,bomber.glb
 
-    NEXT_PUBLIC_AVAILABLE_MODELS=carrier.glb,frigate.glb,submarine.glb
-
-Sense la variable, el joc dibuixa vaixells procedimentals.
+Sense la variable, el joc dibuixa unitats procedimentals. Els fitxers es serveixen amb cache immutable (next.config.ts).
