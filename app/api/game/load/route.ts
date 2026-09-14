@@ -32,8 +32,8 @@ export async function GET(req: Request) {
       // Partida en espera creada per un company de la mateixa classe
       const waiting = await queryOne<GameRow>(
         `select g.* from games g join players p on p.id::text = g.player_a
-         where g.status = 'waiting' and p.code_id = $1 and g.player_a <> $2
-         order by g.created_at asc limit 1`,
+         where g.status = 'waiting' and p.code_id = $1 and g.player_a <> $2 and (g.player_b is null or g.player_b = $2)
+         order by (g.player_b = $2) desc, g.created_at asc limit 1`,
         [session.codeId, me],
       );
       if (!waiting) return NextResponse.json({ state: null, reason: "Cap partida en espera" });

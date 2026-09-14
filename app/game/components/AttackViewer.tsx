@@ -12,6 +12,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import OceanEnvironment from "./OceanEnvironment";
 import GridOverlay, { type GridMark } from "./GridOverlay";
 import ScoreBoard from "./ScoreBoard";
+import ImpactEffects from "./ImpactEffects";
 import DiedricViews from "@/components/DiedricViews";
 import type { AttackResult } from "@/lib/collision";
 import { clampCoord, fmtCoord, type Coord } from "@/lib/grid";
@@ -83,6 +84,7 @@ export default function AttackViewer({ attacks, weapons, canFire, waiting, onFir
           <color attach="background" args={["#061527"]} />
           <OceanEnvironment particles={false} />
           <GridOverlay activeZ={cursor.z} cursor={cursor} marks={marks} onPick={(c) => setCursor(c)} />
+          <ImpactEffects attacks={attacks} />
           <OrbitControls ref={controls} enablePan={false} minZoom={12} maxZoom={70} maxPolarAngle={Math.PI / 2.05} />
         </Canvas>
         <div className="pointer-events-none absolute left-3 top-3 flex flex-col gap-1">

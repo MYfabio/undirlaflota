@@ -86,7 +86,8 @@ npm run build
 - [x] API + Postgres a Railway (taules auto-creades) + mode online per polling
 - [x] Interfície en català, castellà i anglès
 - [x] Unitats aèries (caces, bombarder) a z = 1, 2
+- [x] Models .glb reals (Sketchfab CC-BY) + explosions (procedimentals i malla per als enfonsaments)
+- [x] Lobby en línia: reptar companys de classe i acceptar reptes (/api/game/challenge)
 - [x] Fitxa a aulaia.cat (apps.json)
-- [ ] Models .glb reals (ara procedimentals)
 - [x] Servei Railway `web` creat des de GitHub, dominis afegits (pendent DNS al registrador)
 - [ ] DNS undirlaflota.cat al registrador

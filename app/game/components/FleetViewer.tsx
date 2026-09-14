@@ -13,6 +13,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import OceanEnvironment from "./OceanEnvironment";
 import GridOverlay, { type GridMark } from "./GridOverlay";
 import ShipModel from "./ShipModel";
+import ImpactEffects from "./ImpactEffects";
 import type { PlacedShip, AttackResult } from "@/lib/collision";
 import type { Coord } from "@/lib/grid";
 import { makeShip } from "@/lib/collision";
@@ -61,6 +62,7 @@ export default function FleetViewer({ fleet, incoming, hidden, placing, onShipCl
             <ShipModel key={s.id} ship={s} onClick={onShipClick ? () => onShipClick(s.id) : undefined} />
           ))}
         {ghost && <ShipModel ship={ghost} ghost invalid={!placing?.valid} showDamage={false} />}
+        {!hidden && <ImpactEffects attacks={incoming} />}
         <OrbitControls ref={controls} enablePan={false} minZoom={12} maxZoom={70} maxPolarAngle={Math.PI / 2.05} />
       </Canvas>
       <div className="pointer-events-none absolute left-3 top-3 flex flex-col gap-1">

@@ -26,7 +26,8 @@ app/about/page.tsx        Context pedagògic
 app/game/page.tsx         Selector de mode + càrrega → GameBoard (dynamic, ssr:false)
 app/game/components/      GameBoard, FleetViewer, AttackViewer, GridOverlay,
                           ShipModel, OceanEnvironment, ScoreBoard, TurnIndicator, GameResult
-app/api/                  auth/login, auth/verify-code, game/create|save|load, scores
+app/api/                  auth/login, auth/verify-code, game/create|save|load|challenge, scores
+app/game/components/      Explosion + ImpactEffects (efectes), MODEL_TUNING a ShipModel
 lib/gameEngine.ts         Estat pur: fases, torns, atac, IA, estadístiques
 lib/collision.ts          Unitats col·locades, resolveAttack, canPlace
 lib/grid.ts               Coord, toWorld, dièdric, distàncies

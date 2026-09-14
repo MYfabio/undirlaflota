@@ -9,7 +9,7 @@
 import { Suspense, useMemo } from "react";
 import * as THREE from "three";
 import { useGLTF } from "@react-three/drei";
-import { SHIPS } from "@/lib/ships";
+import { SHIPS, type ShipType } from "@/lib/ships";
 import { cellsOf, isSunk, type PlacedShip } from "@/lib/collision";
 import { toWorld } from "@/lib/grid";
 import { HIT_COLOR } from "@/lib/config";
@@ -27,28 +27,46 @@ const AVAILABLE_MODELS = new Set<string>(
   (process.env.NEXT_PUBLIC_AVAILABLE_MODELS ?? "").split(",").map((s) => s.trim()).filter(Boolean),
 );
 
-function GltfShip({ file, length, floating }: { file: string; length: number; floating: boolean }) {
+/**
+ * Ajust per model (mesurat amb les caixes contenidores reals dels .glb):
+ *  - lengthAxis: eix del model que correspon a la longitud (proa-popa / morro-cua)
+ *  - scale: factor extra sobre la longitud de les cel·les
+ *  - waterline: fracció de l'alçada del model que queda sota y = 0 (només superfície)
+ *  - lift: desplaçament vertical extra en unitats de cel·la
+ */
+const MODEL_TUNING: Record<ShipType, { lengthAxis: "x" | "z"; scale: number; waterline: number; lift: number }> = {
+  carrier: { lengthAxis: "z", scale: 1.0, waterline: 0.12, lift: 0 },
+  frigate: { lengthAxis: "z", scale: 1.0, waterline: 0.2, lift: 0 },
+  submarine: { lengthAxis: "x", scale: 1.0, waterline: 0, lift: 0 },
+  fighter: { lengthAxis: "z", scale: 0.9, waterline: 0, lift: 0 },
+  bomber: { lengthAxis: "z", scale: 0.85, waterline: 0, lift: 0 },
+};
+
+function GltfShip({ file, length, type }: { file: string; length: number; type: ShipType }) {
   const { scene } = useGLTF(`/models/${file}`);
   const clone = useMemo(() => {
+    const tune = MODEL_TUNING[type];
     const c = scene.clone(true);
     const box = new THREE.Box3().setFromObject(c);
     const size = new THREE.Vector3();
     box.getSize(size);
-    // L'eix llarg del model ha de quedar alineat amb X (el joc rota després segons axis)
-    const rotate = size.z > size.x;
-    const longest = Math.max(size.x, size.z) || 1;
-    const s = length / longest;
+    const modelLength = (tune.lengthAxis === "z" ? size.z : size.x) || 1;
+    const s = (length * tune.scale) / modelLength;
     const center = new THREE.Vector3();
     box.getCenter(center);
     const group = new THREE.Group();
     c.position.copy(center.multiplyScalar(-1)); // centrem al (0,0,0)
-    // Vaixells de superfície: la línia de flotació a y ≈ 0; submarins i avions: centrats a la cel·la
-    if (floating) c.position.y = -box.min.y - size.y * 0.35;
+    if (tune.waterline > 0) {
+      // Vaixells de superfície: el casc queda parcialment sota l'aigua (y = 0)
+      c.position.y = -box.min.y - size.y * tune.waterline;
+    }
+    c.position.y += tune.lift / s;
     group.add(c);
-    group.rotation.y = rotate ? Math.PI / 2 : 0;
+    // El joc espera la longitud sobre X; si el model la té sobre Z, el girem
+    group.rotation.y = tune.lengthAxis === "z" ? Math.PI / 2 : 0;
     group.scale.setScalar(s);
     return group;
-  }, [scene, length, floating]);
+  }, [scene, length, type]);
   return <primitive object={clone} />;
 }
 
@@ -143,12 +161,18 @@ export default function ShipModel({ ship, ghost, invalid, showDamage = true, onC
         <group scale={ghost ? 1 : 1} position={[0, sunk ? -0.25 : 0, 0]} rotation={[0, 0, sunk ? 0.35 : 0]}>
           {useModel && !ghost ? (
             <Suspense fallback={<ProceduralShip ship={ship} color={color} />}>
-              <GltfShip file={def.model} length={def.cells * 0.95} floating={ship.type === "carrier" || ship.type === "frigate"} />
+              <GltfShip file={def.model} length={def.cells * 0.95} type={ship.type} />
             </Suspense>
           ) : (
             <ProceduralShip ship={ship} color={color} />
           )}
         </group>
+        {!ghost && ship.type === "submarine" && !sunk && (
+          <mesh position={[0, 0.1, 0]}>
+            <boxGeometry args={[def.cells, 0.5, 0.9]} />
+            <meshBasicMaterial color={0x2ec4b6} transparent opacity={0.12} depthWrite={false} />
+          </mesh>
+        )}
         {ghost && (
           <mesh position={[0, 0.15, 0]}>
             <boxGeometry args={[def.cells, 0.4, 1]} />

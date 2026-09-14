@@ -9,9 +9,10 @@ Descarregats de Sketchfab (llicència CC Attribution: cal citar l'autor, veure `
 | submarine.glb | Kilo Class Submarine | Art Blender | https://sketchfab.com/3d-models/kilo-class-submarine-b7b2b557ebfa422b961d44b546369b08 |
 | fighter.glb | Low poly SU-57 | SIpriv | https://sketchfab.com/3d-models/low-poly-su-57-b9031bc2e94947b18812ce0eca6b8345 |
 | bomber.glb | Lowpoly B52 Stratofortress | SIpriv | https://sketchfab.com/3d-models/lowpoly-b52-stratofortress-b1236b165402436b92afae6a65fe3e27 |
+| explosion.glb | Explosion (malla estàtica, usada per als enfonsaments) | andersdt | https://sketchfab.com/3d-models/explosion-46fb54741fbc4cc0854c03b5ef5d0624 |
 
 S'activen amb la variable d'entorn:
 
-    NEXT_PUBLIC_AVAILABLE_MODELS=carrier.glb,frigate.glb,submarine.glb,fighter.glb,bomber.glb
+    NEXT_PUBLIC_AVAILABLE_MODELS=carrier.glb,frigate.glb,submarine.glb,fighter.glb,bomber.glb,explosion.glb
 
 Sense la variable, el joc dibuixa unitats procedimentals. Els fitxers es serveixen amb cache immutable (next.config.ts).

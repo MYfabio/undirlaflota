@@ -11,6 +11,7 @@ const CREDITS = [
   { name: "Kilo Class Submarine", author: "Art Blender", url: "https://sketchfab.com/3d-models/kilo-class-submarine-b7b2b557ebfa422b961d44b546369b08" },
   { name: "Low poly SU-57", author: "SIpriv", url: "https://sketchfab.com/3d-models/low-poly-su-57-b9031bc2e94947b18812ce0eca6b8345" },
   { name: "Lowpoly B52 Stratofortress", author: "SIpriv", url: "https://sketchfab.com/3d-models/lowpoly-b52-stratofortress-b1236b165402436b92afae6a65fe3e27" },
+  { name: "Explosion", author: "andersdt", url: "https://sketchfab.com/3d-models/explosion-46fb54741fbc4cc0854c03b5ef5d0624" },
 ];
 
 /** Pàgina "Sobre l'app": context pedagògic per a docents i famílies. */

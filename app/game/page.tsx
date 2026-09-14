@@ -27,7 +27,118 @@ function Loader({ text }: { text: string }) {
   );
 }
 
-type Session = { username: string } | null;
+type Session = { username: string; code: string; course: string } | null;
+
+interface LobbyData {
+  persisted: boolean;
+  classmates: { id: string; username: string }[];
+  incoming: { id: string; from: string; at: string }[];
+  outgoing: { id: string; to: string; at: string }[];
+}
+
+/** Lobby en línia: reptar companys de classe i acceptar reptes (patró MatEscac). */
+function OnlineLobby({ session, onStart, t }: { session: NonNullable<Session>; onStart: (s: GameState, role: PlayerId) => void; t: (k: string, v?: Record<string, string | number>) => string }) {
+  const [data, setData] = useState<LobbyData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const refresh = async () => {
+    const d = await fetch("/api/game/challenge").then((r) => r.json()).catch(() => null);
+    if (d) setData(d);
+  };
+  useEffect(() => {
+    refresh();
+    const i = setInterval(refresh, 5000);
+    return () => clearInterval(i);
+  }, []);
+
+  // Si un repte enviat ja s'ha acceptat, la partida deixa d'estar "waiting": la carreguem
+  useEffect(() => {
+    if (!data) return;
+    (async () => {
+      const r = await fetch("/api/game/load").then((x) => x.json()).catch(() => null);
+      if (r?.state && r.state.mode === "online" && r.status === "active") onStart(r.state, r.role);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  const post = async (body: Record<string, string>) => {
+    setBusy(true);
+    setError(null);
+    const r = await fetch("/api/game/challenge", { method: "POST", body: JSON.stringify(body) });
+    const d = await r.json();
+    setBusy(false);
+    if (!r.ok) return setError(d.error ?? "Error");
+    if (d.state) onStart(d.state, d.role);
+    else refresh();
+  };
+
+  if (data && !data.persisted) {
+    return (
+      <div className="card max-w-md text-center">
+        <p className="font-extrabold">{t("lobby.noDb")}</p>
+        <Link href="/game?mode=ai" className="btn-primary mt-4">{t("mode.ai")}</Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card w-full max-w-lg">
+      <h1 className="text-2xl font-black">{t("lobby.title")}</h1>
+      <p className="mt-1 text-sm text-mar-100/75">{t("lobby.subtitle", { course: session.course })}</p>
+      {error && <p className="mt-2 text-sm text-perill">{error}</p>}
+
+      {data && data.incoming.length > 0 && (
+        <section className="mt-5">
+          <h2 className="text-xs font-extrabold uppercase tracking-wide text-batalla">{t("lobby.incoming")}</h2>
+          <ul className="mt-2 space-y-2">
+            {data.incoming.map((c) => (
+              <li key={c.id} className="flex items-center justify-between gap-2 rounded-xl border border-batalla/40 bg-batalla/10 p-3">
+                <span className="font-bold">⚔️ {t("lobby.from", { name: c.from })}</span>
+                <span className="flex gap-2">
+                  <button className="btn-success !px-3 !py-1 text-xs" disabled={busy} onClick={() => post({ accept: c.id })}>{t("lobby.accept")}</button>
+                  <button className="btn-secondary !px-3 !py-1 text-xs" disabled={busy} onClick={() => post({ decline: c.id })}>{t("lobby.decline")}</button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="mt-5">
+        <h2 className="text-xs font-extrabold uppercase tracking-wide text-mar-300">{t("lobby.classmates")}</h2>
+        {!data ? (
+          <p className="mt-2 animate-pulse text-sm text-mar-300">{t("common.loading")}</p>
+        ) : data.classmates.length === 0 ? (
+          <p className="mt-2 text-sm text-mar-100/70">{t("lobby.noClassmates", { code: session.code })}</p>
+        ) : (
+          <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+            {data.classmates.map((c) => {
+              const pending = data.outgoing.find((o) => o.to === c.username);
+              return (
+                <li key={c.id} className="flex items-center justify-between gap-2 rounded-xl border border-mar-300/20 bg-mar-950/50 px-3 py-2">
+                  <span className="font-bold">👤 {c.username}</span>
+                  {pending ? (
+                    <button className="text-xs text-mar-300 underline" disabled={busy} onClick={() => post({ decline: pending.id })} title={t("lobby.decline")}>
+                      ⏳ {t("lobby.waitingAccept", { name: c.username })}
+                    </button>
+                  ) : (
+                    <button className="btn-primary !px-3 !py-1 text-xs" disabled={busy} onClick={() => post({ opponentId: c.id })}>{t("lobby.challenge")}</button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
+      <p className="mt-4 text-[11px] text-mar-300/60">{t("lobby.refresh")}</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link href="/game?mode=new" className="btn-secondary !px-3 !py-1 text-xs">← {t("mode.title")}</Link>
+      </div>
+    </div>
+  );
+}
 
 function GamePageInner() {
   const { t } = useT();
@@ -64,20 +175,8 @@ function GamePageInner() {
     })();
   }, [resume, session]);
 
-  // Online: crear o unir-se
-  const [online, setOnline] = useState<{ state: GameState; role: PlayerId } | null | "error">(null);
-  useEffect(() => {
-    if (chosen?.mode !== "online" || !session) return;
-    (async () => {
-      const j = await fetch("/api/game/load?join=1").then((r) => r.json()).catch(() => null);
-      if (j?.state) return setOnline({ state: j.state, role: "b" });
-      const c = await fetch("/api/game/create", { method: "POST", body: JSON.stringify({ mode: "online", opponentName: "Rival" }) })
-        .then((r) => r.json())
-        .catch(() => null);
-      if (c?.state && c.persisted) return setOnline({ state: c.state, role: "a" });
-      setOnline("error");
-    })();
-  }, [chosen, session]);
+  // Online: la partida arrenca des del lobby (repte acceptat)
+  const [online, setOnline] = useState<{ state: GameState; role: PlayerId } | null>(null);
 
   if (session === undefined) return <Loader text={t("mode.checkingSession")} />;
 
@@ -131,15 +230,10 @@ function GamePageInner() {
 
   if (chosen.mode === "online") {
     if (!session) return <Loader text={t("mode.needLoginOnline")} />;
-    if (online === null) return <Loader text={t("mode.searchingClass")} />;
-    if (online === "error") {
+    if (online === null) {
       return (
         <div className="flex min-h-screen items-center justify-center p-4">
-          <div className="card max-w-md text-center">
-            <p className="font-extrabold">{t("mode.onlineNeedDb")}</p>
-            <p className="mt-2 text-sm text-mar-100/75">{t("mode.meanwhile")}</p>
-            <button className="btn-primary mt-4" onClick={() => setChosen({ mode: "ai" })}>{t("mode.ai")}</button>
-          </div>
+          <OnlineLobby session={session} t={t} onStart={(state, role) => setOnline({ state, role })} />
         </div>
       );
     }

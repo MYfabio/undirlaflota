@@ -45,7 +45,7 @@ export default function OceanEnvironment({ particles = true }: { particles?: boo
   useFrame(({ clock }) => {
     if (waterRef.current) {
       const m = waterRef.current.material as THREE.MeshPhysicalMaterial;
-      m.opacity = 0.32 + Math.sin(clock.elapsedTime * 0.8) * 0.03;
+      m.opacity = 0.2 + Math.sin(clock.elapsedTime * 0.8) * 0.03;
     }
   });
   const size = Math.max(GRID_SIZE.x, GRID_SIZE.y) + 0.5;
@@ -62,7 +62,7 @@ export default function OceanEnvironment({ particles = true }: { particles?: boo
         <meshPhysicalMaterial
           color={new THREE.Color(OCEAN_COLOR)}
           transparent
-          opacity={0.35}
+          opacity={0.22}
           roughness={0.15}
           metalness={0.1}
           transmission={0.2}
