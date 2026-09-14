@@ -31,5 +31,5 @@ export const PALETTE = {
 } as const;
 
 export const APP_NAME = "Undirlaflota";
-export const APP_TAGLINE = "La guerra submarina en 3D";
-export const APP_DOMAIN = "undirlaflota.cat";
+export const APP_TAGLINE = "Enfonsar la flota en 3D";
+export const APP_DOMAIN = "enfonsarlaflota.aulaia.cat";

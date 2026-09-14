@@ -3,9 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { useT } from "@/components/LangProvider";
+
+const HeroModel = dynamic(() => import("@/components/HeroModel"), { ssr: false });
 
 const fade = {
   hidden: { opacity: 0, y: 24 },
@@ -49,9 +52,14 @@ export default function Landing() {
             custom={2}
             initial="hidden"
             animate="show"
-            className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-mar-300/20 shadow-2xl shadow-mar-900"
+            className="relative aspect-[11/7] overflow-hidden rounded-3xl border border-mar-300/20 shadow-2xl shadow-mar-900"
           >
-            <Image src="/images/hero.png" alt={t("landing.heroAlt")} fill priority className="object-cover" />
+            <Image src="/images/hero.jpg" alt={t("landing.heroAlt")} fill priority className="object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-mar-950/70 via-transparent to-transparent" />
+            <HeroModel />
+            <span className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-mar-950/70 px-3 py-1 text-[11px] font-bold text-mar-100">
+              🖱️ {t("game.dragHint")}
+            </span>
           </motion.div>
         </section>
 

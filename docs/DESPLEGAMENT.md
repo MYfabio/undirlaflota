@@ -6,7 +6,7 @@
 |---|---|
 | Repo GitHub | `MYfabio/undirlaflota`, branca `main` |
 | Hosting | Railway (auto-deploy des de GitHub) |
-| Domini | `undirlaflota.cat` (+ `www`) |
+| Domini | `enfonsarlaflota.aulaia.cat` (CNAME a cdmon) · `undirlaflota.cat` pendent de registrar |
 | BD | PostgreSQL a Railway (servei `Postgres`, variable `DATABASE_URL=${{Postgres.DATABASE_URL}}`) |
 | Node | 20+ (Railway usa Nixpacks/Railpack; `npm run build` + `npm start`) |
 
@@ -16,7 +16,7 @@
 DATABASE_URL=${{Postgres.DATABASE_URL}}      # referència al servei Postgres del mateix projecte
 SESSION_SECRET=<cadena llarga aleatòria>
 DEMO_CLASS_CODES=DEMO-2026,ESO3A-2026        # codis acceptats també sense BD
-NEXT_PUBLIC_SITE_URL=https://undirlaflota.cat
+NEXT_PUBLIC_SITE_URL=https://enfonsarlaflota.aulaia.cat
 NODE_ENV=production
 NEXT_PUBLIC_AVAILABLE_MODELS=                # ex: carrier.glb,frigate.glb,submarine.glb,fighter.glb,bomber.glb
 ```
@@ -48,7 +48,7 @@ Amb la CLI:
 railway login
 railway init --name undirlaflota
 railway link
-railway variables --set SESSION_SECRET=... --set NEXT_PUBLIC_SITE_URL=https://undirlaflota.cat
+railway variables --set SESSION_SECRET=... --set NEXT_PUBLIC_SITE_URL=https://enfonsarlaflota.aulaia.cat
 railway up
 railway domain
 ```
@@ -63,6 +63,8 @@ railway domain
 
 Si el registrador no permet CNAME a l'arrel, fes servir ALIAS/ANAME o una redirecció 301 de `undirlaflota.cat` a `www.undirlaflota.cat`.
 Railway emet el certificat TLS automàticament quan el DNS propaga. Comprova amb `railway domain status <id>`.
+
+Subdomini d'aulaia (afegit 14/09/2026): CNAME `enfonsarlaflota` → `prvplho9.up.railway.app` i TXT `_railway-verify.enfonsarlaflota` = `railway-verify=07fdad9ce92c44771393dc5e0692c784895d5bfd29ed33bfcfccc708ab7264c0` a la zona `aulaia.cat` de cdmon.
 
 URL provisional del servei: https://web-production-c5be8.up.railway.app
 
