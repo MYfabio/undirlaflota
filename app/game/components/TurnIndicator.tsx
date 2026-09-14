@@ -5,6 +5,7 @@
  */
 import { motion } from "framer-motion";
 import type { GameState, PlayerId } from "@/lib/gameEngine";
+import { useT } from "@/components/LangProvider";
 
 interface Props {
   state: GameState;
@@ -14,13 +15,14 @@ interface Props {
 }
 
 export default function TurnIndicator({ state, me, waiting, onExit }: Props) {
+  const { t } = useT();
   const a = state.players.a.name;
   const b = state.players.b.name;
   let status = "";
-  if (state.phase === "placing-a") status = `${a} col·loca la flota`;
-  else if (state.phase === "placing-b") status = `${b} col·loca la flota`;
-  else if (state.phase === "finished") status = "Partida acabada";
-  else status = state.current === me ? "És el teu torn" : `Esperant ${state.players[state.current].name}…`;
+  if (state.phase === "placing-a") status = t("game.placingFleet", { name: a });
+  else if (state.phase === "placing-b") status = t("game.placingFleet", { name: b });
+  else if (state.phase === "finished") status = t("game.finished");
+  else status = state.current === me ? t("game.yourTurn") : t("game.waitingFor", { name: state.players[state.current].name });
   const myTurn = state.phase === "playing" && state.current === me;
 
   return (
@@ -30,7 +32,7 @@ export default function TurnIndicator({ state, me, waiting, onExit }: Props) {
           🫧 Undirlaflota <span className="rounded bg-batalla px-1 text-[10px] text-mar-950">3D</span>
         </span>
         <span className="hidden text-sm text-mar-100/70 sm:inline">
-          Torn <span className="coord font-bold text-mar-50">{state.turn}</span> · {a} <span className="text-mar-300/60">vs.</span> {b}
+          {t("game.turn")} <span className="coord font-bold text-mar-50">{state.turn}</span> · {a} <span className="text-mar-300/60">vs.</span> {b}
         </span>
       </div>
       <div className="flex items-center gap-3">
@@ -45,7 +47,7 @@ export default function TurnIndicator({ state, me, waiting, onExit }: Props) {
         </motion.span>
         {onExit && (
           <button onClick={onExit} className="text-xs text-mar-300/70 underline hover:text-batalla">
-            Sortir
+            {t("game.exit")}
           </button>
         )}
       </div>

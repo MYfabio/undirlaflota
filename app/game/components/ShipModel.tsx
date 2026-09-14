@@ -63,6 +63,32 @@ function ProceduralShip({ ship, color }: { ship: PlacedShip; color: number }) {
       </group>
     );
   }
+  if (ship.type === "fighter" || ship.type === "bomber") {
+    const isBomber = ship.type === "bomber";
+    return (
+      <group position={[0, 0.15, 0]}>
+        {/* Fuselatge */}
+        <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
+          <capsuleGeometry args={[isBomber ? 0.16 : 0.11, len - 0.5, 4, 10]} />
+          <meshStandardMaterial color={color} roughness={0.4} metalness={0.5} />
+        </mesh>
+        {/* Ales */}
+        <mesh position={[isBomber ? 0 : -len * 0.05, 0, 0]} castShadow>
+          <boxGeometry args={[isBomber ? 0.5 : 0.35, 0.05, isBomber ? len * 1.1 : len * 0.9]} />
+          <meshStandardMaterial color={color} roughness={0.4} metalness={0.5} />
+        </mesh>
+        {/* Cua */}
+        <mesh position={[-len * 0.42, 0.12, 0]}>
+          <boxGeometry args={[0.25, 0.25, 0.05]} />
+          <meshStandardMaterial color="#9ca3af" />
+        </mesh>
+        <mesh position={[-len * 0.42, 0, 0]}>
+          <boxGeometry args={[0.25, 0.04, 0.5]} />
+          <meshStandardMaterial color="#9ca3af" />
+        </mesh>
+      </group>
+    );
+  }
   const isCarrier = ship.type === "carrier";
   return (
     <group>

@@ -7,31 +7,30 @@
 | Repo GitHub | `MYfabio/undirlaflota`, branca `main` |
 | Hosting | Railway (auto-deploy des de GitHub) |
 | Domini | `undirlaflota.cat` (+ `www`) |
-| BD | Supabase (opcional) |
+| BD | PostgreSQL a Railway (servei `Postgres`, variable `DATABASE_URL=${{Postgres.DATABASE_URL}}`) |
 | Node | 20+ (Railway usa Nixpacks/Railpack; `npm run build` + `npm start`) |
 
-## Variables d'entorn a Railway
+## Variables d'entorn a Railway (servei `web`)
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_KEY=<anon key>
-SUPABASE_SERVICE_ROLE_KEY=<service role key>   # només servidor
-DATABASE_URL=postgresql://...                   # opcional (no s'usa directament)
+DATABASE_URL=${{Postgres.DATABASE_URL}}      # referència al servei Postgres del mateix projecte
 SESSION_SECRET=<cadena llarga aleatòria>
-DEMO_CLASS_CODES=DEMO-2026                      # codis acceptats sense BD
+DEMO_CLASS_CODES=DEMO-2026,ESO3A-2026        # codis acceptats també sense BD
 NEXT_PUBLIC_SITE_URL=https://undirlaflota.cat
-NEXT_PUBLIC_AVAILABLE_MODELS=                   # ex: carrier.glb,frigate.glb,submarine.glb
+NODE_ENV=production
+NEXT_PUBLIC_AVAILABLE_MODELS=                # ex: carrier.glb,frigate.glb,submarine.glb,fighter.glb,bomber.glb
 ```
 
-Sense les variables de Supabase l'app funciona igualment: sessió per cookie, partides a `localStorage`, codis de `DEMO_CLASS_CODES`.
+Sense `DATABASE_URL` l'app funciona igualment: sessió per cookie, partides a `localStorage`, codis de `DEMO_CLASS_CODES`.
 
 ## Passos
 
-### 1. Supabase
-1. Crea un projecte a supabase.com.
-2. SQL Editor → enganxa `supabase/schema.sql` → Run. Crea les taules i el codi `ESO3A-2026`.
-3. Settings → API: copia URL, anon key i service role key.
-4. Per afegir codis de classe: `insert into classroom_codes (code, school, course, teacher, expires_at) values ('ESO4B-2026','Institut Escola Industrial','4t ESO B','Fabio', now() + interval '1 year');`
+### 1. Base de dades (Postgres a Railway)
+1. Al projecte Railway: `railway add --database postgres` (ja fet: servei `Postgres`).
+2. Al servei `web`: `DATABASE_URL=${{Postgres.DATABASE_URL}}` (ja fet).
+3. Les taules es creen soles al primer accés (`lib/db.ts` → `ensureSchema`). També s'insereix el codi `ESO3A-2026`.
+4. Per afegir codis de classe: `railway connect Postgres` i
+   `insert into classroom_codes (code, school, course, teacher, expires_at) values ('ESO4B-2026','Institut Escola Industrial','4t ESO B','Fabio', now() + interval '1 year');`
 
 ### 2. GitHub
 ```bash
@@ -71,7 +70,7 @@ URL provisional del servei: https://web-production-c5be8.up.railway.app
 Descarrega els `.glb` a `public/models/` (veure `public/models/README.md`) i defineix `NEXT_PUBLIC_AVAILABLE_MODELS`. Sense models, el joc usa geometria procedimental.
 
 ### 6. aulaia.cat
-Entrada afegida a `aulaia-cat/data/apps.json` amb slug `undirlaflota`. Cal fer commit i push del repo d'aulaia perquè aparegui a `/apps/undirlaflota`.
+Entrada afegida a `aulaia-cat/data/apps.json` amb slug `undirlaflota`. Commit fet al repo local d'aulaia; cal desplegar-lo perquè aparegui a `/apps/undirlaflota`.
 
 ## Comprovacions abans de desplegar
 
@@ -84,9 +83,10 @@ npm run build
 
 - [x] Landing, login, tutorial, about
 - [x] Game board amb 2 visors 3D, col·locació, atac, IA, hot-seat, resultat
-- [x] API + esquema Supabase + mode online per polling
+- [x] API + Postgres a Railway (taules auto-creades) + mode online per polling
+- [x] Interfície en català, castellà i anglès
+- [x] Unitats aèries (caces, bombarder) a z = 1, 2
 - [x] Fitxa a aulaia.cat (apps.json)
 - [ ] Models .glb reals (ara procedimentals)
-- [ ] Supabase de producció configurat a Railway
 - [x] Servei Railway `web` creat des de GitHub, dominis afegits (pendent DNS al registrador)
 - [ ] DNS undirlaflota.cat al registrador

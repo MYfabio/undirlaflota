@@ -11,6 +11,7 @@ import { computeStats, type GameState, type PlayerId } from "@/lib/gameEngine";
 import { fmtCoord } from "@/lib/grid";
 import { FLEET_SHIP_COUNT } from "@/lib/ships";
 import DiedricViews from "@/components/DiedricViews";
+import { useT } from "@/components/LangProvider";
 
 interface Props {
   state: GameState;
@@ -19,19 +20,20 @@ interface Props {
   onSaveMemorable?: () => Promise<boolean>;
 }
 
-function pedagogicalMessage(uniqueXY: number, levels: number[], accuracy: number) {
+function pedagogicalMessage(t: (k: string, v?: Record<string, string | number>) => string, uniqueXY: number, levels: number[], accuracy: number) {
   const parts: string[] = [];
-  if (uniqueXY >= 20) parts.push(`Has explorat ${uniqueXY} columnes (x, y) diferents: expert en cobertura del pla!`);
-  else if (uniqueXY >= 10) parts.push(`Has usat ${uniqueXY} columnes (x, y) diferents. Bona exploració del pla.`);
-  else parts.push(`Només ${uniqueXY} columnes (x, y) diferents: prova de repartir més els trets.`);
-  if (levels.length >= 3) parts.push(`Has treballat ${levels.length} nivells Z: pensament 3D complet.`);
-  else if (levels.length === 2) parts.push("Has usat 2 nivells Z. Recorda que els submarins poden ser a -1 o -2.");
-  else parts.push("Has disparat sempre al mateix nivell Z: la tercera dimensió també compta!");
-  if (accuracy >= 40) parts.push("Precisió alta: les deduccions han funcionat.");
+  if (uniqueXY >= 20) parts.push(t("result.ped.xyHigh", { n: uniqueXY }));
+  else if (uniqueXY >= 10) parts.push(t("result.ped.xyMid", { n: uniqueXY }));
+  else parts.push(t("result.ped.xyLow", { n: uniqueXY }));
+  if (levels.length >= 3) parts.push(t("result.ped.z3", { n: levels.length }));
+  else if (levels.length === 2) parts.push(t("result.ped.z2"));
+  else parts.push(t("result.ped.z1"));
+  if (accuracy >= 40) parts.push(t("result.ped.acc"));
   return parts.join(" ");
 }
 
 export default function GameResult({ state, me, onPlayAgain, onSaveMemorable }: Props) {
+  const { t } = useT();
   const [replayIdx, setReplayIdx] = useState<number | null>(null);
   const [memorable, setMemorable] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const opp: PlayerId = me === "a" ? "b" : "a";
@@ -52,10 +54,10 @@ export default function GameResult({ state, me, onPlayAgain, onSaveMemorable }: 
         <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="text-center">
           <div className="text-6xl">{draw ? "🤝" : won ? "🏆" : "🌊"}</div>
           <h1 className="mt-3 text-4xl font-black">
-            {draw ? "Empat!" : won ? `Has guanyat, ${myName}!` : `Ha guanyat ${oppName}`}
+            {draw ? t("result.draw") : won ? t("result.won", { name: myName }) : t("result.lost", { name: oppName })}
           </h1>
           <p className="mt-2 text-mar-100/75">
-            {state.turn} torns · {state.players[me].attacks.length + state.players[opp].attacks.length} trets en total
+            {t("result.summary", { turns: state.turn, shots: state.players[me].attacks.length + state.players[opp].attacks.length })}
           </p>
         </motion.div>
 
@@ -67,39 +69,39 @@ export default function GameResult({ state, me, onPlayAgain, onSaveMemorable }: 
             <div key={name} className={`card ${highlight ? "border-batalla/40" : ""}`}>
               <h2 className="text-lg font-extrabold">{name}</h2>
               <dl className="coord mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                <dt className="text-mar-100/70">Trets</dt>
+                <dt className="text-mar-100/70">{t("result.shots")}</dt>
                 <dd className="text-right font-bold">{s.shots}</dd>
-                <dt className="text-mar-100/70">Impactes</dt>
+                <dt className="text-mar-100/70">{t("result.hits")}</dt>
                 <dd className="text-right font-bold">{s.hits}</dd>
-                <dt className="text-mar-100/70">Precisió</dt>
+                <dt className="text-mar-100/70">{t("result.accuracy")}</dt>
                 <dd className="text-right font-bold text-batalla">{s.accuracy}%</dd>
-                <dt className="text-mar-100/70">Vaixells enfonsats</dt>
+                <dt className="text-mar-100/70">{t("result.sunk")}</dt>
                 <dd className="text-right font-bold">{s.sunk} / {FLEET_SHIP_COUNT}</dd>
-                <dt className="text-mar-100/70">Dany fet</dt>
+                <dt className="text-mar-100/70">{t("result.damage")}</dt>
                 <dd className="text-right font-bold">{s.damage}</dd>
-                <dt className="text-mar-100/70">Flota pròpia</dt>
-                <dd className="text-right font-bold">{s.shipsAlive} vius · {s.lifeLeft}/{s.lifeTotal}</dd>
-                <dt className="text-mar-100/70">Patró d&apos;atac</dt>
-                <dd className="text-right font-bold text-estrategia">{s.pattern}</dd>
-                <dt className="text-mar-100/70">Salt mitjà</dt>
-                <dd className="text-right font-bold">{s.avgJump} cel·les</dd>
+                <dt className="text-mar-100/70">{t("result.ownFleet")}</dt>
+                <dd className="text-right font-bold">{s.shipsAlive} {t("result.alive")} · {s.lifeLeft}/{s.lifeTotal}</dd>
+                <dt className="text-mar-100/70">{t("result.pattern")}</dt>
+                <dd className="text-right font-bold text-estrategia">{t(`pattern.${s.pattern}`)}</dd>
+                <dt className="text-mar-100/70">{t("result.avgJump")}</dt>
+                <dd className="text-right font-bold">{s.avgJump} {t("result.cells")}</dd>
               </dl>
             </div>
           ))}
         </div>
 
         <div className="card border-estrategia/40">
-          <h2 className="font-extrabold text-estrategia">📐 Connexió pedagògica</h2>
-          <p className="mt-2 text-mar-100/85">{pedagogicalMessage(mine.uniqueXY, mine.levelsUsed, mine.accuracy)}</p>
+          <h2 className="font-extrabold text-estrategia">{t("result.pedagogy")}</h2>
+          <p className="mt-2 text-mar-100/85">{pedagogicalMessage(t, mine.uniqueXY, mine.levelsUsed, mine.accuracy)}</p>
           <p className="mt-1 text-sm text-mar-100/60">
-            Nivells Z usats: <span className="coord">{mine.levelsUsed.length ? mine.levelsUsed.join(", ") : "cap"}</span>
+            {t("result.levels")} <span className="coord">{mine.levelsUsed.length ? mine.levelsUsed.join(", ") : t("result.none")}</span>
           </p>
         </div>
 
         {/* Replay */}
         <div className="card">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="font-extrabold">🎬 Anàlisi de la partida (replay)</h2>
+            <h2 className="font-extrabold">{t("result.replay")}</h2>
             <div className="flex items-center gap-2">
               <button className="btn-secondary !px-3 !py-1 text-xs" onClick={() => setReplayIdx((i) => Math.max(0, (i ?? replay.length) - 1))} disabled={!replay.length}>
                 ◀
@@ -110,14 +112,14 @@ export default function GameResult({ state, me, onPlayAgain, onSaveMemorable }: 
               <button className="btn-secondary !px-3 !py-1 text-xs" onClick={() => setReplayIdx((i) => Math.min(replay.length - 1, (i ?? replay.length - 1) + 1))} disabled={!replay.length}>
                 ▶
               </button>
-              <button className="btn-secondary !px-3 !py-1 text-xs" onClick={() => setReplayIdx(null)}>Tot</button>
+              <button className="btn-secondary !px-3 !py-1 text-xs" onClick={() => setReplayIdx(null)}>{t("result.all")}</button>
             </div>
           </div>
           {current ? (
             <div className="mt-3">
               <p className="coord text-sm">
-                Tret {shown.length}: <span className="font-bold text-batalla">{fmtCoord(current.coord)}</span> ·{" "}
-                {current.outcome === "miss" ? "aigua" : current.outcome === "sunk" ? "enfonsat" : "tocat"}
+                {t("result.shotN", { n: shown.length })} <span className="font-bold text-batalla">{fmtCoord(current.coord)}</span> ·{" "}
+                {current.outcome === "miss" ? t("game.water") : current.outcome === "sunk" ? t("outcome.sunk").toLowerCase() : t("game.hitLower")}
               </p>
               <div className="mt-2">
                 <DiedricViews
@@ -127,13 +129,13 @@ export default function GameResult({ state, me, onPlayAgain, onSaveMemorable }: 
               </div>
             </div>
           ) : (
-            <p className="mt-2 text-sm text-mar-100/60">No hi ha trets per analitzar.</p>
+            <p className="mt-2 text-sm text-mar-100/60">{t("result.noShots")}</p>
           )}
         </div>
 
         <div className="flex flex-wrap justify-center gap-3">
-          <button className="btn-primary" onClick={onPlayAgain}>🔄 Jugar de nou</button>
-          <Link href="/" className="btn-secondary">🏠 Tornar a l&apos;inici</Link>
+          <button className="btn-primary" onClick={onPlayAgain}>{t("result.again")}</button>
+          <Link href="/" className="btn-secondary">{t("common.home")}</Link>
           {onSaveMemorable && (
             <button
               className="btn-success"
@@ -144,7 +146,7 @@ export default function GameResult({ state, me, onPlayAgain, onSaveMemorable }: 
                 setMemorable(ok ? "saved" : "error");
               }}
             >
-              {memorable === "saved" ? "⭐ Guardada!" : memorable === "error" ? "No s'ha pogut guardar" : "⭐ Guardar com a partida memorable"}
+              {memorable === "saved" ? t("result.memorableSaved") : memorable === "error" ? t("result.memorableError") : t("result.memorable")}
             </button>
           )}
         </div>

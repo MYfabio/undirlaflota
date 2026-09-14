@@ -1,7 +1,11 @@
 /**
  * Definicions de vaixells, avions i armes.
  *
- * Cada vaixell ocupa `cells` cel·les en línia recta (eix X o Y) i té `life`
+ * Tres capes: aire (caces i bombarders, z = 1 o 2), superfície (portaavions i
+ * fragates, z = 0) i sota l'aigua (submarins, z = -1 o -2). Els torpedes toquen
+ * z ≤ 0 i els atacs aeris z ≥ 0: la superfície és vulnerable a totes dues armes.
+ *
+ * Cada unitat ocupa `cells` cel·les en línia recta (eix X o Y) i té `life`
  * punts de vida totals repartits uniformement (life / cells punts per cel·la).
  * Un portaavions de 5 cel·les i 25 punts necessita 5 torpedes (5 de dany)
  * ben dirigits per enfonsar-se del tot.
@@ -9,7 +13,7 @@
 import { TOTAL_WEAPONS } from "./config";
 
 export type Zone = "surface" | "underwater" | "air";
-export type ShipType = "carrier" | "frigate" | "submarine";
+export type ShipType = "carrier" | "frigate" | "submarine" | "fighter" | "bomber";
 export type WeaponType = "torpedo" | "airstrike";
 export type Axis = "x" | "y";
 
@@ -71,6 +75,34 @@ export const SHIPS: Record<ShipType, ShipDef> = {
     color: 0x1f2937,
     emoji: "🫧",
   },
+  fighter: {
+    type: "fighter",
+    name: "Caça",
+    plural: "Caces",
+    size: 8,
+    cells: 2,
+    count: 2,
+    life: 8,
+    model: "fighter.glb",
+    zones: ["air"],
+    allowedZ: [1, 2],
+    color: 0xe5e7eb,
+    emoji: "🛩️",
+  },
+  bomber: {
+    type: "bomber",
+    name: "Bombarder",
+    plural: "Bombarders",
+    size: 12,
+    cells: 3,
+    count: 1,
+    life: 12,
+    model: "bomber.glb",
+    zones: ["air"],
+    allowedZ: [1, 2],
+    color: 0x6b7280,
+    emoji: "✈️",
+  },
 };
 
 export interface WeaponDef {
@@ -92,9 +124,9 @@ export const WEAPONS: Record<WeaponType, WeaponDef> = {
     damage: 5,
     range: "3D",
     count: TOTAL_WEAPONS.torpedo,
-    hitsZ: () => true,
+    hitsZ: (z) => z <= 0, // superfície i sota l'aigua
     emoji: "🎯",
-    description: "Arriba a qualsevol profunditat. Dany 5.",
+    description: "Toca la superfície i qualsevol profunditat (Z ≤ 0). Dany 5.",
   },
   airstrike: {
     type: "airstrike",
@@ -102,21 +134,15 @@ export const WEAPONS: Record<WeaponType, WeaponDef> = {
     damage: 7,
     range: "3D+surface",
     count: TOTAL_WEAPONS.airstrike,
-    hitsZ: (z) => z >= 0,
-    emoji: "✈️",
+    hitsZ: (z) => z >= 0, // superfície i aire
+    emoji: "🚀",
     description: "Només toca objectius a la superfície o a l'aire (Z ≥ 0). Dany 7.",
   },
 };
 
-/** Models d'avions (decoratius / tutorial). */
-export const AIRCRAFT = {
-  fighter: { name: "Caça", model: "fighter.glb", emoji: "🛩️" },
-  bomber: { name: "Bombarder", model: "bomber.glb", emoji: "✈️" },
-} as const;
+export const SHIP_ORDER: ShipType[] = ["carrier", "frigate", "submarine", "fighter", "bomber"];
 
-export const SHIP_ORDER: ShipType[] = ["carrier", "frigate", "submarine"];
-
-/** Vida total d'una flota completa (2×25 + 3×15 + 2×12 = 119). */
+/** Vida total d'una flota completa (2×25 + 3×15 + 2×12 + 2×8 + 1×12 = 147). */
 export const FLEET_TOTAL_LIFE = SHIP_ORDER.reduce(
   (acc, t) => acc + SHIPS[t].count * SHIPS[t].life,
   0,

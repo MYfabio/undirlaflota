@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { APP_NAME } from "@/lib/config";
+import { useT } from "./LangProvider";
+import LangSwitcher from "./LangSwitcher";
 
 /** Capçalera comuna (landing, tutorial, login, about). */
 export default function SiteHeader() {
+  const { t } = useT();
   return (
     <header className="sticky top-0 z-40 border-b border-mar-300/10 bg-mar-950/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
@@ -15,13 +20,14 @@ export default function SiteHeader() {
         </Link>
         <nav className="flex items-center gap-1 text-sm font-semibold sm:gap-3">
           <Link href="/tutorial" className="rounded-lg px-3 py-2 hover:bg-mar-900">
-            Tutorial
+            {t("nav.tutorial")}
           </Link>
           <Link href="/about" className="hidden rounded-lg px-3 py-2 hover:bg-mar-900 sm:block">
-            Pedagogia
+            {t("nav.about")}
           </Link>
+          <LangSwitcher />
           <Link href="/login" className="btn-primary !px-4 !py-2 text-sm">
-            Jugar
+            {t("nav.play")}
           </Link>
         </nav>
       </div>

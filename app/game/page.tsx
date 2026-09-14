@@ -10,10 +10,11 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { GameMode, GameState, PlayerId } from "@/lib/gameEngine";
+import { useT } from "@/components/LangProvider";
 
 const GameBoard = dynamic(() => import("./components/GameBoard"), {
   ssr: false,
-  loading: () => <Loader text="Carregant el mar en 3D…" />,
+  loading: () => <Loader text="…" />,
 });
 
 const STORAGE_KEY = "undirlaflota:partida";
@@ -29,6 +30,7 @@ function Loader({ text }: { text: string }) {
 type Session = { username: string } | null;
 
 function GamePageInner() {
+  const { t } = useT();
   const params = useSearchParams();
   const wantMode = params.get("mode") ?? "new";
   const resume = params.get("resume") === "1";
@@ -77,22 +79,22 @@ function GamePageInner() {
     })();
   }, [chosen, session]);
 
-  if (session === undefined) return <Loader text="Comprovant la sessió…" />;
+  if (session === undefined) return <Loader text={t("mode.checkingSession")} />;
 
-  const name = session?.username ?? "Jugador A";
+  const name = session?.username ?? t("mode.playerA");
   const tutorialOnly = !session;
 
   // Reprendre partida
   if (resume) {
-    if (loaded === undefined) return <Loader text="Buscant la teva última partida…" />;
+    if (loaded === undefined) return <Loader text={t("mode.searchingGame")} />;
     if (loaded.state) {
       return <GameBoard mode={loaded.state.mode} playerName={name} initialState={loaded.state} initialRole={loaded.role ?? "a"} hasSession={Boolean(session)} />;
     }
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="card max-w-md text-center">
-          <p className="font-extrabold">No hi ha cap partida activa.</p>
-          <Link href="/game?mode=new" className="btn-primary mt-4">Nova partida</Link>
+          <p className="font-extrabold">{t("mode.noActive")}</p>
+          <Link href="/game?mode=new" className="btn-primary mt-4">{t("mode.title")}</Link>
         </div>
       </div>
     );
@@ -103,29 +105,23 @@ function GamePageInner() {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="card w-full max-w-lg">
-          <h1 className="text-2xl font-black">Nova partida</h1>
-          <p className="mt-1 text-sm text-mar-100/75">Hola, {name}. Com vols jugar?</p>
+          <h1 className="text-2xl font-black">{t("mode.title")}</h1>
+          <p className="mt-1 text-sm text-mar-100/75">{t("mode.hello", { name })}</p>
           <div className="mt-5 grid gap-3">
-            <button className="btn-primary justify-start" onClick={() => setChosen({ mode: "ai" })}>
-              🤖 Contra l&apos;ordinador
-            </button>
+            <button className="btn-primary justify-start" onClick={() => setChosen({ mode: "ai" })}>{t("mode.ai")}</button>
             <div className="flex flex-col gap-2 rounded-xl border border-mar-300/20 p-3">
-              <p className="text-sm font-bold">👥 Dos jugadors al mateix dispositiu</p>
-              <input className="input" placeholder="Nom del jugador B" value={opp} onChange={(e) => setOpp(e.target.value)} maxLength={24} />
-              <button className="btn-success" onClick={() => setChosen({ mode: "local", opponent: opp.trim() || "Jugador B" })}>
-                Començar partida local
-              </button>
+              <p className="text-sm font-bold">{t("mode.local")}</p>
+              <input className="input" placeholder={t("mode.opponent")} value={opp} onChange={(e) => setOpp(e.target.value)} maxLength={24} />
+              <button className="btn-success" onClick={() => setChosen({ mode: "local", opponent: opp.trim() || t("mode.playerB") })}>{t("mode.startLocal")}</button>
             </div>
-            <button className="btn-secondary justify-start" disabled={tutorialOnly} onClick={() => setChosen({ mode: "online" })} title={tutorialOnly ? "Cal iniciar sessió" : ""}>
-              🌐 En línia amb la meva classe {tutorialOnly && "(cal sessió)"}
+            <button className="btn-secondary justify-start" disabled={tutorialOnly} onClick={() => setChosen({ mode: "online" })}>
+              {t("mode.online")} {tutorialOnly && t("mode.needSession")}
             </button>
-            <button className="btn-secondary justify-start" onClick={() => setChosen({ mode: "tutorial" })}>
-              📘 Mode tutorial (sense guardar)
-            </button>
+            <button className="btn-secondary justify-start" onClick={() => setChosen({ mode: "tutorial" })}>{t("mode.tutorial")}</button>
           </div>
           {tutorialOnly && (
             <p className="mt-4 text-xs text-mar-300/70">
-              No tens sessió: les partides no es guardaran. <Link href="/login" className="underline">Entra amb codi de classe</Link>.
+              {t("mode.noSession")} <Link href="/login" className="underline">{t("mode.loginLink")}</Link>.
             </p>
           )}
         </div>
@@ -134,15 +130,15 @@ function GamePageInner() {
   }
 
   if (chosen.mode === "online") {
-    if (!session) return <Loader text="Cal iniciar sessió per jugar en línia" />;
-    if (online === null) return <Loader text="Buscant una partida de la teva classe…" />;
+    if (!session) return <Loader text={t("mode.needLoginOnline")} />;
+    if (online === null) return <Loader text={t("mode.searchingClass")} />;
     if (online === "error") {
       return (
         <div className="flex min-h-screen items-center justify-center p-4">
           <div className="card max-w-md text-center">
-            <p className="font-extrabold">El mode en línia necessita la base de dades configurada.</p>
-            <p className="mt-2 text-sm text-mar-100/75">Mentrestant pots jugar contra l&apos;ordinador o en mode local.</p>
-            <button className="btn-primary mt-4" onClick={() => setChosen({ mode: "ai" })}>Contra l&apos;ordinador</button>
+            <p className="font-extrabold">{t("mode.onlineNeedDb")}</p>
+            <p className="mt-2 text-sm text-mar-100/75">{t("mode.meanwhile")}</p>
+            <button className="btn-primary mt-4" onClick={() => setChosen({ mode: "ai" })}>{t("mode.ai")}</button>
           </div>
         </div>
       );

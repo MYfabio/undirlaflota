@@ -17,6 +17,7 @@ import type { PlacedShip, AttackResult } from "@/lib/collision";
 import type { Coord } from "@/lib/grid";
 import { makeShip } from "@/lib/collision";
 import type { Axis, ShipType } from "@/lib/ships";
+import { useT } from "@/components/LangProvider";
 
 interface Props {
   fleet: PlacedShip[];
@@ -33,6 +34,7 @@ interface Props {
 }
 
 export default function FleetViewer({ fleet, incoming, hidden, placing, onShipClick }: Props) {
+  const { t } = useT();
   const controls = useRef<OrbitControlsImpl>(null);
   const marks: GridMark[] = useMemo(
     () => incoming.filter((a) => a.outcome === "miss").map((a) => ({ coord: a.coord, outcome: a.outcome })),
@@ -62,18 +64,18 @@ export default function FleetViewer({ fleet, incoming, hidden, placing, onShipCl
         <OrbitControls ref={controls} enablePan={false} minZoom={12} maxZoom={70} maxPolarAngle={Math.PI / 2.05} />
       </Canvas>
       <div className="pointer-events-none absolute left-3 top-3 flex flex-col gap-1">
-        <span className="chip pointer-events-auto border-mar-300/40 bg-mar-950/80">🛳️ La meva flota</span>
-        <span className="text-[10px] text-mar-300/70">Arrossega per rotar · roda per fer zoom</span>
+        <span className="chip pointer-events-auto border-mar-300/40 bg-mar-950/80">{t("game.myFleet")}</span>
+        <span className="text-[10px] text-mar-300/70">{t("game.dragHint")}</span>
       </div>
       <button
         onClick={() => controls.current?.reset()}
         className="absolute right-3 top-3 rounded-lg bg-mar-950/80 px-2 py-1 text-xs text-mar-100 hover:bg-mar-700"
       >
-        ⟲ Vista
+        {t("game.resetView")}
       </button>
       {hidden && (
         <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-mar-950/85 text-center">
-          <p className="text-mar-100/80">🙈 Flota amagada durant el canvi de torn</p>
+          <p className="text-mar-100/80">{t("game.hiddenFleet")}</p>
         </div>
       )}
     </div>

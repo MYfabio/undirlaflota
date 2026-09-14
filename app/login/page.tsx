@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import { useT } from "@/components/LangProvider";
 
 type SessionInfo = { username: string; code: string; school: string; course: string } | null;
 
@@ -16,6 +17,7 @@ type SessionInfo = { username: string; code: string; school: string; course: str
  */
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useT();
   const [code, setCode] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -24,23 +26,20 @@ export default function LoginPage() {
   const [codeInfo, setCodeInfo] = useState<{ school: string; course: string } | null>(null);
 
   useEffect(() => {
-    fetch("/api/auth/login")
-      .then((r) => r.json())
-      .then((d) => setSession(d.session))
-      .catch(() => {});
+    fetch("/api/auth/login").then((r) => r.json()).then((d) => setSession(d.session)).catch(() => {});
   }, []);
 
-  // Validació en viu del codi (feedback immediat a l'alumne)
+  // Validació en viu del codi
   useEffect(() => {
     const c = code.trim().toUpperCase();
     if (c.length < 5) return setCodeInfo(null);
-    const t = setTimeout(() => {
+    const h = setTimeout(() => {
       fetch("/api/auth/verify-code", { method: "POST", body: JSON.stringify({ code: c }) })
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => setCodeInfo(d?.valid ? { school: d.school, course: d.course } : null))
         .catch(() => setCodeInfo(null));
     }, 350);
-    return () => clearTimeout(t);
+    return () => clearTimeout(h);
   }, [code]);
 
   async function submit(e: React.FormEvent) {
@@ -50,7 +49,7 @@ export default function LoginPage() {
     const r = await fetch("/api/auth/login", { method: "POST", body: JSON.stringify({ code, username }) });
     const d = await r.json();
     setLoading(false);
-    if (!r.ok) return setError(d.error ?? "Error desconegut");
+    if (!r.ok) return setError(r.status === 401 ? t("login.errCode") : r.status === 400 ? t("login.errUser") : d.error);
     setSession(d.session);
   }
 
@@ -67,74 +66,42 @@ export default function LoginPage() {
           {!session ? (
             <form onSubmit={submit} className="space-y-5">
               <div>
-                <h1 className="text-2xl font-black">Entra a la flota</h1>
-                <p className="mt-1 text-sm text-mar-100/75">Amb el codi que t&apos;ha donat el docent.</p>
+                <h1 className="text-2xl font-black">{t("login.title")}</h1>
+                <p className="mt-1 text-sm text-mar-100/75">{t("login.subtitle")}</p>
               </div>
               <label className="block">
-                <span className="text-sm font-bold">Codi de classe</span>
-                <input
-                  className="input coord mt-1 uppercase"
-                  placeholder="ESO3A-2026"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  autoComplete="off"
-                  required
-                />
-                {codeInfo && (
-                  <span className="mt-1 block text-xs text-estrategia">
-                    ✓ {codeInfo.school} · {codeInfo.course}
-                  </span>
-                )}
+                <span className="text-sm font-bold">{t("login.code")}</span>
+                <input className="input coord mt-1 uppercase" placeholder="ESO3A-2026" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} autoComplete="off" required />
+                {codeInfo && <span className="mt-1 block text-xs text-estrategia">✓ {codeInfo.school} · {codeInfo.course}</span>}
               </label>
               <label className="block">
-                <span className="text-sm font-bold">Nom d&apos;usuari</span>
-                <input
-                  className="input mt-1"
-                  placeholder="Anna"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  maxLength={24}
-                  required
-                />
+                <span className="text-sm font-bold">{t("login.username")}</span>
+                <input className="input mt-1" placeholder="Anna" value={username} onChange={(e) => setUsername(e.target.value)} maxLength={24} required />
               </label>
               {error && (
                 <div className="rounded-xl border border-perill/40 bg-perill/10 p-3 text-sm">
                   <p className="font-bold text-perill">{error}</p>
                   <p className="mt-1 text-mar-100/80">
-                    Sense codi? <Link href="/about#docents" className="underline">Contacta amb el teu docent</Link> o prova el{" "}
-                    <Link href="/game?mode=tutorial" className="underline">mode tutorial</Link>.
+                    {t("login.noCode")} <Link href="/about#docents" className="underline">{t("login.contactTeacher")}</Link> {t("login.orTry")}{" "}
+                    <Link href="/game?mode=tutorial" className="underline">{t("login.tutorialMode")}</Link>.
                   </p>
                 </div>
               )}
-              <button className="btn-primary w-full" disabled={loading}>
-                {loading ? "Comprovant…" : "Entrar"}
-              </button>
-              <p className="text-center text-xs text-mar-300/70">
-                Codi de prova: <span className="coord">DEMO-2026</span>
-              </p>
+              <button className="btn-primary w-full" disabled={loading}>{loading ? t("login.checking") : t("login.submit")}</button>
+              <p className="text-center text-xs text-mar-300/70">{t("login.demo")} <span className="coord">DEMO-2026</span></p>
             </form>
           ) : (
             <div className="space-y-5">
               <div>
-                <h1 className="text-2xl font-black">Hola, {session.username}! 👋</h1>
-                <p className="mt-1 text-sm text-mar-100/75">
-                  {session.school} · {session.course} · <span className="coord">{session.code}</span>
-                </p>
+                <h1 className="text-2xl font-black">{t("login.hello", { name: session.username })}</h1>
+                <p className="mt-1 text-sm text-mar-100/75">{session.school} · {session.course} · <span className="coord">{session.code}</span></p>
               </div>
               <div className="grid gap-3">
-                <button className="btn-primary" onClick={() => router.push("/game?resume=1")}>
-                  ▶ Entrar a la partida existent
-                </button>
-                <button className="btn-success" onClick={() => router.push("/game?mode=new")}>
-                  ✦ Nova partida
-                </button>
-                <button className="btn-secondary" onClick={() => router.push("/game?mode=tutorial")}>
-                  📘 Mode tutorial (sense guardar)
-                </button>
+                <button className="btn-primary" onClick={() => router.push("/game?resume=1")}>{t("login.resume")}</button>
+                <button className="btn-success" onClick={() => router.push("/game?mode=new")}>{t("login.new")}</button>
+                <button className="btn-secondary" onClick={() => router.push("/game?mode=tutorial")}>{t("login.tutorial")}</button>
               </div>
-              <button onClick={logout} className="w-full text-center text-xs text-mar-300/70 underline">
-                Sortir de la sessió
-              </button>
+              <button onClick={logout} className="w-full text-center text-xs text-mar-300/70 underline">{t("login.logout")}</button>
             </div>
           )}
         </motion.div>

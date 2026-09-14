@@ -9,8 +9,8 @@ Alumnat de 3r i 4t d'ESO (14-16 anys). Útil també a 2n d'ESO com a introducci�
 El joc clàssic ja és un exercici de coordenades en 2D. La versió 3D afegeix:
 
 1. **Una tercera coordenada amb significat físic** (profunditat / altura), cosa que fa que l'alumne hagi de raonar sobre plans paral·lels i no només sobre una quadrícula.
-2. **Restriccions per nivell** (submarins només sota l'aigua, atacs aeris només a la superfície), que obliguen a decidir quina arma i quin pla explorar: la mateixa pregunta que es fa en dibuix tècnic en triar una vista.
-3. **Recursos limitats** (20 torpedes + 6 atacs aeris per a 500 cel·les), que converteixen la partida en un problema d'optimització i probabilitat.
+2. **Tres capes amb restriccions** (avions a l'aire z = 1, 2; vaixells a la superfície z = 0; submarins a z = -1, -2). Els torpedes toquen z ≤ 0 i els atacs aeris z ≥ 0, així que cal decidir quina arma i quin pla explorar: la mateixa pregunta que es fa en dibuix tècnic en triar una vista.
+3. **Recursos limitats** (20 torpedes + 10 atacs aeris per a 500 cel·les), que converteixen la partida en un problema d'optimització i probabilitat.
 
 ## Connexió curricular (Decret 175/2022, Catalunya)
 
@@ -20,7 +20,7 @@ El joc clàssic ja és un exercici de coordenades en 2D. La versió 3D afegeix:
 | Coordenades cartesianes a l'espai | Cada tret és un punt (x, y, z); el visor mostra els eixos i etiquetes. |
 | Distància entre punts | La pantalla final calcula el "salt mitjà" entre trets; el tutorial té calculadora de distància euclidiana. |
 | Plans, rectes i posicions relatives | Un vaixell és un segment sobre un pla z = k, paral·lel a un eix. |
-| Recompte i probabilitat | 500 cel·les, 7 vaixells, 26 trets: quina probabilitat té un tret a l'atzar? |
+| Recompte i probabilitat | 500 cel·les, 10 unitats, 30 trets: quina probabilitat té un tret a l'atzar? |
 | Resolució de problemes i estratègia | Patró de cerca (tauler d'escacs cada N columnes segons la longitud del vaixell). |
 
 ### Educació Visual, Plàstica i Audiovisual · Dibuix tècnic
@@ -37,7 +37,7 @@ Pensament estratègic, gestió de recursos, comunicació (partides locals a dos)
 
 1. **El punt a l'espai.** Sense les tres coordenades no hi ha objectiu. L'ordre importa: (3, 7, -2) ≠ (7, 3, -2).
 2. **Projeccions ortogonals.** Cada vista perd una coordenada. Amb dues vistes es reconstrueix el punt. El joc ho mostra en viu al panell d'atac.
-3. **Distàncies i patrons.** Un portaavions fa 5 cel·les: un patró que dispari cada 5 columnes el troba segur. Les fragates (3) i submarins (3) demanen un patró més dens.
+3. **Distàncies i patrons.** Un portaavions fa 5 cel·les: un patró que dispari cada 5 columnes el troba segur. Les fragates (3), submarins (3) i el bombarder (3) demanen un patró més dens; els caces (2) encara més.
 
 ## Seqüència didàctica proposada (3 sessions)
 
@@ -58,7 +58,7 @@ Pensament estratègic, gestió de recursos, comunicació (partides locals a dos)
 
 ## Avaluació
 
-- **Evidències automàtiques**: precisió, trets, vaixells enfonsats, nivells Z usats, patró (sistemàtic / exploratori / mixt), desats a Supabase per codi de classe.
+- **Evidències automàtiques**: precisió, trets, unitats enfonsades, nivells Z usats, patró (sistemàtic / exploratori / mixt), desats a la base de dades per codi de classe.
 - **Evidències manuals**: llibreta amb les vistes dièdriques, fitxa de coordenades, reflexió escrita.
 - **Rúbrica suggerida** (4 nivells): llegeix coordenades / usa les tres coordenades correctament / dedueix posicions amb dues vistes / dissenya i justifica un patró de cerca.
 
@@ -71,3 +71,7 @@ Pensament estratègic, gestió de recursos, comunicació (partides locals a dos)
 
 - Decret 175/2022, d'ordenació dels ensenyaments de l'educació bàsica (Catalunya).
 - Catàleg d'apps educatives aulaia.cat, on Undirlaflota es relaciona amb MatEscac (escacs 3D) i Diedric3D.
+
+## Idiomes
+
+La interfície està disponible en català, castellà i anglès (selector a la capçalera). Els documents del projecte són en català.

@@ -1,13 +1,13 @@
 /**
  * POST /api/game/create  { mode, opponentName? }
- * Crea una partida i la desa a Supabase (si està configurat).
+ * Crea una partida i la desa a la BD (si està configurada).
  * En mode "online" la partida queda en estat "waiting" fins que un rival
  * de la mateixa classe s'hi uneix via /api/game/load?join=1.
  */
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { createGame, type GameMode } from "@/lib/gameEngine";
-import { supabaseServer } from "@/lib/supabase";
+import { isDbConfigured, query } from "@/lib/db";
 
 const MODES: GameMode[] = ["local", "ai", "online", "tutorial"];
 
@@ -19,21 +19,16 @@ export async function POST(req: Request) {
   const nameB = mode === "ai" ? "Ordinador" : String(body.opponentName ?? "Rival").trim().slice(0, 24) || "Rival";
   const state = createGame(mode, session.username, nameB);
 
-  const sb = supabaseServer();
-  if (sb && mode !== "tutorial") {
-    const { error } = await sb.from("games").insert({
-      id: state.id,
-      player_a: session.playerId,
-      player_b: mode === "online" ? null : session.playerId,
-      status: mode === "online" ? "waiting" : "active",
-      mode,
-      state,
-      ships_a: [],
-      ships_b: [],
-      attacks_a: [],
-      attacks_b: [],
-    });
-    if (error) return NextResponse.json({ error: error.message, state }, { status: 500 });
+  if (isDbConfigured && mode !== "tutorial") {
+    try {
+      await query(
+        `insert into games (id, player_a, player_b, status, mode, state, ships_a, ships_b, attacks_a, attacks_b)
+         values ($1, $2, $3, $4, $5, $6, '[]', '[]', '[]', '[]')`,
+        [state.id, session.playerId, mode === "online" ? null : session.playerId, mode === "online" ? "waiting" : "active", mode, JSON.stringify(state)],
+      );
+    } catch (e) {
+      return NextResponse.json({ error: (e as Error).message, state }, { status: 500 });
+    }
   }
-  return NextResponse.json({ state, persisted: Boolean(sb) });
+  return NextResponse.json({ state, persisted: isDbConfigured });
 }

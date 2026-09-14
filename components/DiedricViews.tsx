@@ -7,6 +7,7 @@
  */
 import { GRID_SIZE, Z_MAX, Z_MIN } from "@/lib/config";
 import type { Coord } from "@/lib/grid";
+import { useT } from "./LangProvider";
 
 interface Props {
   target: Coord;
@@ -75,6 +76,7 @@ function View({
 }
 
 export default function DiedricViews({ target, extras = [], compact }: Props) {
+  const { t } = useT();
   const zRows = Array.from({ length: Z_MAX - Z_MIN + 1 }, (_, i) => Z_MAX - i); // de dalt (+2) a baix (-2)
   const zToRow = (z: number) => Z_MAX - z;
   const xs = Array.from({ length: GRID_SIZE.x }, (_, i) => i);
@@ -82,7 +84,7 @@ export default function DiedricViews({ target, extras = [], compact }: Props) {
   return (
     <div className={`grid gap-2 ${compact ? "grid-cols-3" : "grid-cols-1 sm:grid-cols-3"}`}>
       <View
-        title="Planta (X · Y)"
+        title={t("diedric.planta")}
         cols={GRID_SIZE.x}
         rows={GRID_SIZE.y}
         colLabels={xs}
@@ -93,7 +95,7 @@ export default function DiedricViews({ target, extras = [], compact }: Props) {
         compact={compact}
       />
       <View
-        title="Alçat (X · Z)"
+        title={t("diedric.alcat")}
         cols={GRID_SIZE.x}
         rows={zRows.length}
         colLabels={xs}
@@ -104,7 +106,7 @@ export default function DiedricViews({ target, extras = [], compact }: Props) {
         compact={compact}
       />
       <View
-        title="Perfil (Y · Z)"
+        title={t("diedric.perfil")}
         cols={GRID_SIZE.y}
         rows={zRows.length}
         colLabels={ys}

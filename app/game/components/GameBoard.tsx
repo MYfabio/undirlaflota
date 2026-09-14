@@ -7,10 +7,10 @@
  *  - local:   dos jugadors al mateix dispositiu (pantalla de canvi de torn).
  *  - ai:      contra l'ordinador (IA de lib/gameEngine).
  *  - tutorial: com "ai" però sense desar res.
- *  - online:  per torns via Supabase (polling a /api/game/load cada 3 s).
+ *  - online:  per torns via Postgres (polling a /api/game/load cada 3 s).
  *
  * L'estat del joc és el GameState pur; aquest component només el presenta
- * i el desa (localStorage sempre; API si hi ha sessió i Supabase).
+ * i el desa (localStorage sempre; API si hi ha sessió i base de dades).
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -38,6 +38,7 @@ import {
 import { canPlace, fleetAlive, fleetLife } from "@/lib/collision";
 import { clampCoord, type Coord } from "@/lib/grid";
 import { FLEET_SHIP_COUNT, FLEET_TOTAL_LIFE, SHIPS, type Axis, type ShipType, type WeaponType } from "@/lib/ships";
+import { useT } from "@/components/LangProvider";
 
 const STORAGE_KEY = "undirlaflota:partida";
 
@@ -52,8 +53,9 @@ interface Props {
 
 export default function GameBoard({ mode, playerName, opponentName, initialState, initialRole, hasSession }: Props) {
   const router = useRouter();
+  const { t } = useT();
   const [state, setState] = useState<GameState>(
-    () => initialState ?? createGame(mode, playerName, mode === "ai" || mode === "tutorial" ? "Ordinador" : opponentName || "Jugador B"),
+    () => initialState ?? createGame(mode, playerName, mode === "ai" || mode === "tutorial" ? t("mode.computer") : opponentName || t("mode.playerB")),
   );
   // En mode local, "me" canvia a cada torn; en ai/online és fix.
   const [role] = useState<PlayerId>(initialRole ?? "a");
@@ -119,22 +121,24 @@ export default function GameBoard({ mode, playerName, opponentName, initialState
     }
     if (state.phase === "playing" && state.current === "b") {
       setWaiting(true);
-      const t = setTimeout(() => {
+      const timer = setTimeout(() => {
         const choice = aiChooseAttack(state, "b");
         if (!choice) return setWaiting(false);
         const { state: s } = attack(state, "b", choice.coord, choice.weapon);
         setState(s);
         setWaiting(false);
         if (s.lastResult && s.lastResult.by === "b") {
+          const coord = `(${choice.coord.x}, ${choice.coord.y}, ${choice.coord.z})`;
           setNotice(
             s.lastResult.outcome === "miss"
-              ? `L'ordinador ha disparat a (${choice.coord.x}, ${choice.coord.y}, ${choice.coord.z}): aigua.`
-              : `⚠️ L'ordinador t'ha ${s.lastResult.outcome === "sunk" ? "enfonsat" : "tocat"} un ${SHIPS[s.lastResult.shipType!].name.toLowerCase()} a (${choice.coord.x}, ${choice.coord.y}, ${choice.coord.z})!`,
+              ? t("game.notice.aiMiss", { coord })
+              : t(s.lastResult.outcome === "sunk" ? "game.notice.aiSunk" : "game.notice.aiHit", { ship: t(`ship.${s.lastResult.shipType!}`).toLowerCase(), coord }),
           );
         }
       }, 900);
-      return () => clearTimeout(t);
+      return () => clearTimeout(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, state]);
 
   useEffect(() => {
@@ -212,10 +216,10 @@ export default function GameBoard({ mode, playerName, opponentName, initialState
     if (res.result) {
       setNotice(
         res.result.outcome === "miss"
-          ? "💧 Aigua."
+          ? t("game.notice.miss")
           : res.result.outcome === "sunk"
-            ? `💀 Has enfonsat un ${SHIPS[res.result.shipType!].name.toLowerCase()}!`
-            : `🔴 Tocat! ${SHIPS[res.result.shipType!].name} (−${res.result.damage})`,
+            ? t("game.notice.sunk", { ship: t(`ship.${res.result.shipType!}`).toLowerCase() })
+            : t("game.notice.hit", { ship: t(`ship.${res.result.shipType!}`), n: res.result.damage }),
       );
     }
     if (mode === "local" && res.state.phase === "playing") setTimeout(() => setHandoff(true), 1200);
@@ -268,13 +272,13 @@ export default function GameBoard({ mode, playerName, opponentName, initialState
             <div className="card !p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-extrabold">
-                  🧭 {state.players[placingPlayer!].name}, col·loca la flota{" "}
+                  {t("game.placeTitle", { name: state.players[placingPlayer!].name })}{" "}
                   <span className="coord text-mar-300">({FLEET_SHIP_COUNT - pending.length}/{FLEET_SHIP_COUNT})</span>
                 </p>
                 <div className="flex gap-2">
-                  <button className="btn-secondary !px-3 !py-1 text-xs" onClick={doRandom}>🎲 Aleatori</button>
+                  <button className="btn-secondary !px-3 !py-1 text-xs" onClick={doRandom}>{t("game.random")}</button>
                   <button className="btn-success !px-3 !py-1 text-xs" disabled={!isFleetComplete(state.players[placingPlayer!].fleet)} onClick={doConfirm}>
-                    ✓ Confirmar flota
+                    {t("game.confirmFleet")}
                   </button>
                 </div>
               </div>
@@ -287,16 +291,16 @@ export default function GameBoard({ mode, playerName, opponentName, initialState
                       onClick={() => { if (placed) { setState(removeShip(state, placingPlayer!, r.id)); } setSel(r); setOrigin((o) => ({ ...o, z: SHIPS[r.type].allowedZ[0] })); }}
                       className={`chip ${sel?.id === r.id ? "border-batalla text-batalla" : placed ? "border-estrategia/50 text-estrategia" : ""}`}
                     >
-                      {SHIPS[r.type].emoji} {SHIPS[r.type].name} {r.id.split("-")[1]} {placed ? "✓" : ""}
+                      {SHIPS[r.type].emoji} {t(`ship.${r.type}`)} {r.id.split("-")[1]} {placed ? "✓" : ""}
                     </button>
                   );
                 })}
               </div>
               {sel && (
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-                  <span className="font-bold">{SHIPS[sel.type].name}</span>
+                  <span className="font-bold">{t(`ship.${sel.type}`)}</span>
                   <button className="btn-secondary !px-2 !py-1 text-xs" onClick={() => setAxis((a) => (a === "x" ? "y" : "x"))}>
-                    ↻ Eix {axis.toUpperCase()} (R)
+                    {t("game.axis", { axis: axis.toUpperCase() })}
                   </button>
                   {(["x", "y", "z"] as const).map((k) => (
                     <label key={k} className="coord flex items-center gap-1">
@@ -312,34 +316,34 @@ export default function GameBoard({ mode, playerName, opponentName, initialState
                     </label>
                   ))}
                   <button className="btn-primary !px-3 !py-1 text-xs" disabled={!placeValid} onClick={() => doPlace()}>
-                    Col·locar
+                    {t("game.place")}
                   </button>
                   <span className="text-xs text-perill">{placeError ?? (!placeValid ? canPlace(state.players[placingPlayer!].fleet, sel.type, origin, axis, sel.id).reason : "")}</span>
                 </div>
               )}
               <p className="mt-1 text-[11px] text-mar-300/70">
-                Clic a una cel·la del visor per situar l&apos;origen. Z permès per {SHIPS[sel?.type ?? "carrier"].name.toLowerCase()}: {SHIPS[sel?.type ?? "carrier"].allowedZ.join(", ")}.
+                {t("game.placeHint", { ship: t(`ship.${sel?.type ?? "carrier"}`).toLowerCase(), z: SHIPS[sel?.type ?? "carrier"].allowedZ.join(", ") })}
               </p>
             </div>
           ) : (
             <div className="grid gap-2 sm:grid-cols-2">
               <div className="card !p-3 text-sm">
-                <p className="text-xs font-extrabold uppercase tracking-wide text-mar-300">Estat de la flota</p>
-                <p className="coord mt-1">Vaixells: <b>{fleetAlive(myFleet)}/{FLEET_SHIP_COUNT}</b> {fleetAlive(myFleet) === FLEET_SHIP_COUNT ? "✓" : ""}</p>
-                <p className="coord">Vides: <b>{fleetLife(myFleet)}/{FLEET_TOTAL_LIFE}</b></p>
+                <p className="text-xs font-extrabold uppercase tracking-wide text-mar-300">{t("game.fleetStatus")}</p>
+                <p className="coord mt-1">{t("game.ships")} <b>{fleetAlive(myFleet)}/{FLEET_SHIP_COUNT}</b> {fleetAlive(myFleet) === FLEET_SHIP_COUNT ? "✓" : ""}</p>
+                <p className="coord">{t("game.lives")} <b>{fleetLife(myFleet)}/{FLEET_TOTAL_LIFE}</b></p>
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-mar-950">
                   <div className="h-full bg-estrategia transition-all" style={{ width: `${(fleetLife(myFleet) / FLEET_TOTAL_LIFE) * 100}%` }} />
                 </div>
                 <ul className="mt-2 space-y-0.5 text-xs text-mar-100/75">
                   {myFleet.map((s) => (
                     <li key={s.id} className="flex justify-between">
-                      <span>{SHIPS[s.type].emoji} {SHIPS[s.type].name} {s.id.split("-")[1]}</span>
+                      <span>{SHIPS[s.type].emoji} {t(`ship.${s.type}`)} {s.id.split("-")[1]}</span>
                       <span className="coord">{s.cellLife.reduce((a, b) => a + b, 0)}/{SHIPS[s.type].life}</span>
                     </li>
                   ))}
                 </ul>
               </div>
-              <ScoreBoard title="Impactes rebuts" attacks={incoming} emptyText="Cap atac rebut" />
+              <ScoreBoard title={t("game.received")} attacks={incoming} emptyText={t("game.noReceived")} />
             </div>
           )}
         </section>
@@ -358,11 +362,9 @@ export default function GameBoard({ mode, playerName, opponentName, initialState
           ) : (
             <div className="card flex flex-1 flex-col items-center justify-center text-center">
               <div className="text-5xl">🎯</div>
-              <p className="mt-3 font-extrabold">El visor d&apos;atacs s&apos;activarà quan les dues flotes estiguin col·locades.</p>
-              {mode === "online" && !iAmPlacing && <p className="mt-2 text-sm text-mar-300">Esperant que el rival col·loqui la flota…</p>}
-              {mode === "local" && (
-                <p className="mt-2 text-sm text-mar-100/70">Recorda: el jugador B no ha de mirar mentre A col·loca la flota!</p>
-              )}
+              <p className="mt-3 font-extrabold">{t("game.attackWaits")}</p>
+              {mode === "online" && !iAmPlacing && <p className="mt-2 text-sm text-mar-300">{t("game.waitRival")}</p>}
+              {mode === "local" && <p className="mt-2 text-sm text-mar-100/70">{t("game.localWarn")}</p>}
             </div>
           )}
         </section>
@@ -374,10 +376,10 @@ export default function GameBoard({ mode, playerName, opponentName, initialState
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-mar-950/97 p-6">
             <div className="card max-w-md text-center">
               <div className="text-5xl">🔁</div>
-              <h2 className="mt-3 text-2xl font-black">Passa el dispositiu a {state.players[state.phase === "placing-b" ? "b" : state.phase === "placing-a" ? "a" : state.current].name}</h2>
-              <p className="mt-2 text-sm text-mar-100/75">L&apos;altre jugador no ha de mirar la pantalla fins que premis el botó.</p>
+              <h2 className="mt-3 text-2xl font-black">{t("game.handoffTitle", { name: state.players[state.phase === "placing-b" ? "b" : state.phase === "placing-a" ? "a" : state.current].name })}</h2>
+              <p className="mt-2 text-sm text-mar-100/75">{t("game.handoffText")}</p>
               <button className="btn-primary mt-5 w-full" onClick={() => setHandoff(false)}>
-                Sóc {state.players[state.phase === "placing-b" ? "b" : state.phase === "placing-a" ? "a" : state.current].name}, continuar
+                {t("game.handoffBtn", { name: state.players[state.phase === "placing-b" ? "b" : state.phase === "placing-a" ? "a" : state.current].name })}
               </button>
             </div>
           </motion.div>

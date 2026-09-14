@@ -5,12 +5,12 @@
  * entra amb codi + nom d'usuari. La sessió es guarda en una cookie signada
  * (HMAC) que conté { playerId, username, codeId, code, school, course }.
  *
- * Sense Supabase: s'accepten els codis de la variable DEMO_CLASS_CODES
+ * Sense base de dades (DATABASE_URL): s'accepten els codis de la variable DEMO_CLASS_CODES
  * (o "DEMO-2026" per defecte) i el playerId és derivat del nom.
  */
 import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
-import { supabaseServer, type ClassroomCodeRow } from "./supabase";
+import { isDbConfigured, query, queryOne, type ClassroomCodeRow } from "./db";
 
 export const SESSION_COOKIE = "undirlaflota_session";
 const SECRET = process.env.SESSION_SECRET ?? "undirlaflota-dev-secret-canvia-me";
@@ -51,11 +51,9 @@ function demoCodes(): ClassroomCodeRow[] {
 export async function findClassroomCode(raw: string): Promise<ClassroomCodeRow | null> {
   const code = normalizeCode(raw);
   if (!CODE_REGEX.test(code)) return null;
-  const sb = supabaseServer();
-  if (sb) {
-    const { data } = await sb.from("classroom_codes").select("*").eq("code", code).maybeSingle();
-    if (data) {
-      const row = data as ClassroomCodeRow;
+  if (isDbConfigured) {
+    const row = await queryOne<ClassroomCodeRow>("select * from classroom_codes where code = $1", [code]);
+    if (row) {
       if (row.expires_at && new Date(row.expires_at) < new Date()) return null;
       return row;
     }
@@ -66,18 +64,18 @@ export async function findClassroomCode(raw: string): Promise<ClassroomCodeRow |
 /** Registra (o recupera) el jugador dins la classe. */
 export async function upsertPlayer(codeRow: ClassroomCodeRow, username: string): Promise<{ id: string; username: string }> {
   const name = username.trim();
-  const sb = supabaseServer();
-  if (sb && !codeRow.id.startsWith("demo-")) {
-    const { data: existing } = await sb
-      .from("players")
-      .select("id, username")
-      .eq("code_id", codeRow.id)
-      .ilike("username", name)
-      .maybeSingle();
-    if (existing) return existing as { id: string; username: string };
-    const { data, error } = await sb.from("players").insert({ code_id: codeRow.id, username: name }).select("id, username").single();
-    if (error) throw new Error(error.message);
-    return data as { id: string; username: string };
+  if (isDbConfigured && !codeRow.id.startsWith("demo-")) {
+    const existing = await queryOne<{ id: string; username: string }>(
+      "select id, username from players where code_id = $1 and lower(username) = lower($2)",
+      [codeRow.id, name],
+    );
+    if (existing) return existing;
+    const created = await queryOne<{ id: string; username: string }>(
+      "insert into players (code_id, username) values ($1, $2) returning id, username",
+      [codeRow.id, name],
+    );
+    if (!created) throw new Error("No s'ha pogut registrar el jugador");
+    return created;
   }
   // Mode local: id determinista a partir del codi i el nom
   const id = createHmac("sha256", SECRET).update(`${codeRow.code}:${name.toLowerCase()}`).digest("hex").slice(0, 16);

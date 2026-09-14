@@ -12,7 +12,7 @@ export const CELL_SIZE = 1; // unitats Three.js per cel·la
 
 // Joc
 export const MAX_TURNS_IDLE = 300; // segons sense activitat abans d'abandonar
-export const TOTAL_WEAPONS = { torpedo: 20, airstrike: 6 } as const;
+export const TOTAL_WEAPONS = { torpedo: 20, airstrike: 10 } as const;
 
 // Visual (colors hex numèrics per a Three.js)
 export const GRID_COLOR = 0x4a9eff;

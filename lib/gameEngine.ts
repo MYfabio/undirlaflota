@@ -272,11 +272,11 @@ export function aiChooseAttack(state: GameState, player: PlayerId, rng: () => nu
   const openHits = p.attacks.filter((r) => r.outcome === "hit" && r.shipId && !sunkIds.has(r.shipId));
 
   const pick = (coord: Coord): { coord: Coord; weapon: WeaponType } | null => {
-    const weapon: WeaponType = coord.z >= 0 && p.weapons.airstrike > 0 && rng() < 0.4 ? "airstrike" : "torpedo";
-    const w = p.weapons[weapon] > 0 ? weapon : p.weapons.torpedo > 0 ? "torpedo" : p.weapons.airstrike > 0 ? "airstrike" : null;
-    if (!w) return null;
-    if (!WEAPONS[w].hitsZ(coord.z)) return p.weapons.torpedo > 0 ? { coord, weapon: "torpedo" } : null;
-    return { coord, weapon: w };
+    // Aire → només atac aeri; sota l'aigua → només torpede; superfície → qualsevol
+    const usable = (Object.keys(WEAPONS) as WeaponType[]).filter((w) => p.weapons[w] > 0 && WEAPONS[w].hitsZ(coord.z));
+    if (!usable.length) return null;
+    const weapon = coord.z === 0 && usable.length === 2 ? (rng() < 0.3 ? "airstrike" : "torpedo") : usable[0];
+    return { coord, weapon };
   };
 
   // 1. Continuar un impacte obert
@@ -291,14 +291,13 @@ export function aiChooseAttack(state: GameState, player: PlayerId, rng: () => nu
     if (neigh.length) return pick(neigh[Math.floor(rng() * neigh.length)]);
   }
 
-  // 2. Cerca: nivells amb vaixells possibles, patró escacs
-  const candidates = allCoords().filter(
-    (c) => !attacked.has(coordKey(c)) && [0, -1, -2].includes(c.z) && (c.x + c.y + c.z) % 2 === 0,
-  );
-  const pool = candidates.length ? candidates : allCoords().filter((c) => !attacked.has(coordKey(c)));
+  // 2. Cerca: patró escacs a tots els nivells, amb pes segons el que hi pot haver
+  const canHitZ = (z: number) => (Object.keys(WEAPONS) as WeaponType[]).some((w) => p.weapons[w] > 0 && WEAPONS[w].hitsZ(z));
+  const candidates = allCoords().filter((c) => !attacked.has(coordKey(c)) && canHitZ(c.z) && (c.x + c.y + c.z) % 2 === 0);
+  const pool = candidates.length ? candidates : allCoords().filter((c) => !attacked.has(coordKey(c)) && canHitZ(c.z));
   if (!pool.length) return null;
-  // Pes: superfície té més vaixells (5 de 7)
-  const weighted = pool.filter((c) => (c.z === 0 ? true : rng() < 0.45));
+  // Pes: la superfície té 5 unitats de 10; aire 3; sota l'aigua 2
+  const weighted = pool.filter((c) => (c.z === 0 ? true : c.z > 0 ? rng() < 0.55 : rng() < 0.4));
   const list = weighted.length ? weighted : pool;
   return pick(list[Math.floor(rng() * list.length)]);
 }
