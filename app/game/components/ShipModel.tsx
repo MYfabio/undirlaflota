@@ -27,22 +27,28 @@ const AVAILABLE_MODELS = new Set<string>(
   (process.env.NEXT_PUBLIC_AVAILABLE_MODELS ?? "").split(",").map((s) => s.trim()).filter(Boolean),
 );
 
-function GltfShip({ file, length }: { file: string; length: number }) {
+function GltfShip({ file, length, floating }: { file: string; length: number; floating: boolean }) {
   const { scene } = useGLTF(`/models/${file}`);
   const clone = useMemo(() => {
     const c = scene.clone(true);
     const box = new THREE.Box3().setFromObject(c);
     const size = new THREE.Vector3();
     box.getSize(size);
+    // L'eix llarg del model ha de quedar alineat amb X (el joc rota després segons axis)
+    const rotate = size.z > size.x;
     const longest = Math.max(size.x, size.z) || 1;
     const s = length / longest;
-    c.scale.setScalar(s);
-    // Centrem el model
     const center = new THREE.Vector3();
     box.getCenter(center);
-    c.position.sub(center.multiplyScalar(s));
-    return c;
-  }, [scene, length]);
+    const group = new THREE.Group();
+    c.position.copy(center.multiplyScalar(-1)); // centrem al (0,0,0)
+    // Vaixells de superfície: la línia de flotació a y ≈ 0; submarins i avions: centrats a la cel·la
+    if (floating) c.position.y = -box.min.y - size.y * 0.35;
+    group.add(c);
+    group.rotation.y = rotate ? Math.PI / 2 : 0;
+    group.scale.setScalar(s);
+    return group;
+  }, [scene, length, floating]);
   return <primitive object={clone} />;
 }
 
@@ -137,7 +143,7 @@ export default function ShipModel({ ship, ghost, invalid, showDamage = true, onC
         <group scale={ghost ? 1 : 1} position={[0, sunk ? -0.25 : 0, 0]} rotation={[0, 0, sunk ? 0.35 : 0]}>
           {useModel && !ghost ? (
             <Suspense fallback={<ProceduralShip ship={ship} color={color} />}>
-              <GltfShip file={def.model} length={def.cells * 0.95} />
+              <GltfShip file={def.model} length={def.cells * 0.95} floating={ship.type === "carrier" || ship.type === "frigate"} />
             </Suspense>
           ) : (
             <ProceduralShip ship={ship} color={color} />
