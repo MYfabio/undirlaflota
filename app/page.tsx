@@ -117,6 +117,7 @@ export default function Landing() {
             <Link href="/login" className="btn-primary">{t("landing.ctaLogin")}</Link>
             <Link href="/tutorial" className="btn-secondary">{t("landing.seeTutorial")}</Link>
           </div>
+          <a href="https://www.aulaia.cat/alta?app=enfonsar-la-flota" className="text-sm underline">{t("landing.ctaAlta")}</a>
         </section>
       </main>
       <SiteFooter />
