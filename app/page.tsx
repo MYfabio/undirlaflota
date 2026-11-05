@@ -72,6 +72,18 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* PROBLEMA I PERFIL */}
+        <section className="card mt-8 grid gap-6 md:grid-cols-2">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-extrabold">{t("landing.problem")}</h2>
+            <p className="text-mar-100/85">{t("landing.problemText")}</p>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-extrabold">{t("landing.profile")}</h2>
+            <p className="text-mar-100/85">{t("landing.profileText")}</p>
+          </div>
+        </section>
+
         {/* FEATURES */}
         <section className="py-16">
           <h2 className="text-center text-3xl font-black">{t("landing.features")}</h2>
