@@ -74,6 +74,7 @@ const ca: Dict = {
   "landing.ctaTitle": "A punt per submergir-te?",
   "landing.ctaText": "Entra amb el codi que t'ha donat el docent. Si encara no en tens, pots practicar en mode tutorial sense guardar res.",
   "landing.ctaLogin": "Entra amb codi de classe",
+  "landing.ctaTeacher": "🎓 Soc docent: entra amb Google",
   "landing.ctaAlta": "El teu centre encara no hi és? Demana'n l'alta",
 
   // Login
@@ -454,6 +455,7 @@ const es: Dict = {
   "landing.ctaTitle": "¿Listo para sumergirte?",
   "landing.ctaText": "Entra con el código que te ha dado el docente. Si aún no tienes, puedes practicar en modo tutorial sin guardar nada.",
   "landing.ctaLogin": "Entra con código de clase",
+  "landing.ctaTeacher": "🎓 Soy docente: entrar con Google",
   "landing.ctaAlta": "¿Tu centro aún no está? Solicita el alta",
   "login.title": "Entra en la flota",
   "login.subtitle": "Con el código que te ha dado el docente.",
@@ -818,6 +820,7 @@ const en: Dict = {
   "landing.ctaTitle": "Ready to dive?",
   "landing.ctaText": "Sign in with the code your teacher gave you. If you don't have one yet, practise in tutorial mode without saving anything.",
   "landing.ctaLogin": "Sign in with class code",
+  "landing.ctaTeacher": "🎓 I am a teacher: sign in with Google",
   "landing.ctaAlta": "Is your school not here yet? Request access",
   "login.title": "Join the fleet",
   "login.subtitle": "With the code your teacher gave you.",

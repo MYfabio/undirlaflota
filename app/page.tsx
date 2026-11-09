@@ -44,6 +44,7 @@ export default function Landing() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/login" className="btn-primary text-base">{t("landing.playNow")}</Link>
               <Link href="/tutorial" className="btn-secondary text-base">{t("landing.seeTutorial")}</Link>
+              <Link href="/docent" className="btn-secondary text-base">{t("landing.ctaTeacher")}</Link>
             </div>
             <p className="mt-4 text-xs text-mar-300/70">{t("landing.meta")}</p>
           </motion.div>
@@ -127,6 +128,7 @@ export default function Landing() {
           <p className="max-w-xl text-mar-100/85">{t("landing.ctaText")}</p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/login" className="btn-primary">{t("landing.ctaLogin")}</Link>
+            <Link href="/docent" className="btn-success">{t("landing.ctaTeacher")}</Link>
             <Link href="/tutorial" className="btn-secondary">{t("landing.seeTutorial")}</Link>
           </div>
           <a href="https://www.aulaia.cat/alta?app=enfonsar-la-flota" className="text-sm underline">{t("landing.ctaAlta")}</a>

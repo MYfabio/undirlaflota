@@ -25,6 +25,9 @@ export default function SiteHeader() {
           <Link href="/about" className="hidden rounded-lg px-3 py-2 hover:bg-mar-900 sm:block">
             {t("nav.about")}
           </Link>
+          <Link href="/docent" className="hidden rounded-lg px-3 py-2 hover:bg-mar-900 sm:block">
+            {t("nav.teacher")}
+          </Link>
           <LangSwitcher />
           <Link href="/login" className="btn-primary !px-4 !py-2 text-sm">
             {t("nav.play")}
