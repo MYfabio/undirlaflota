@@ -21,6 +21,8 @@ NODE_ENV=production
 GOOGLE_CLIENT_ID=                            # opcional: entrada amb Google
 GOOGLE_CLIENT_SECRET=
 GOOGLE_HOSTED_DOMAIN=escolaindustrial.org    # només comptes d'aquest domini
+SUPERADMIN_EMAILS=                           # correus (separats per comes) que validen docents i veuen totes les classes
+TEACHER_EMAILS=                              # opcional: docents validats directament, sense sol·licitud
 NEXT_PUBLIC_AVAILABLE_MODELS=                # ex: carrier.glb,frigate.glb,submarine.glb,fighter.glb,bomber.glb
 ```
 
@@ -76,6 +78,13 @@ Google Cloud Console → APIs i serveis → Credencials → ID de client OAuth (
 Orígens: `https://enfonsarlaflota.aulaia.cat`, `http://localhost:3215`. URI de redirecció: `https://enfonsarlaflota.aulaia.cat/api/auth/google/callback` i `http://localhost:3215/api/auth/google/callback`.
 L'usuari de Google queda registrat a la classe automàtica `GOOGLE-<DOMINI>` (es crea sola) i pot reptar companys del mateix domini.
 
+### 4c. Rols i panell de docent (`/docent`)
+- **Alumne**: entra amb codi de classe i nom, o amb Google. No veu cap panell.
+- **Docent**: entra amb Google, obre `/docent` i demana accés. Queda pendent fins que un superadmin el valida (o el seu correu és a `TEACHER_EMAILS`). Després pot crear classes (codi generat, vàlid un any), veure l'alumnat i les estadístiques, exportar CSV, treure un alumne i tancar o reobrir la classe.
+- **Superadmin**: correu a `SUPERADMIN_EMAILS`. A més del panell de docent, valida, rebutja o retira docents i veu totes les classes.
+- El rol es calcula al servidor a cada petició (`lib/roles.ts`) a partir del correu de la sessió de Google. Les rutes són a `/api/teacher/*`.
+- Pendent (fase 2): alta de centres, panell de superadmin complet i panell d'alumne.
+
 ### 5. Models 3D (opcional)
 Descarrega els `.glb` a `public/models/` (veure `public/models/README.md`) i defineix `NEXT_PUBLIC_AVAILABLE_MODELS`. Sense models, el joc usa geometria procedimental.
 
@@ -98,6 +107,9 @@ npm run build
 - [x] Unitats aèries (caces, bombarder) a z = 1, 2
 - [x] Models .glb reals (Sketchfab CC-BY) + explosions (procedimentals i malla per als enfonsaments)
 - [x] Lobby en línia: reptar companys de classe i acceptar reptes (/api/game/challenge)
+- [x] Rols (alumne, docent, superadmin) i panell de docent a /docent
 - [x] Fitxa a aulaia.cat (apps.json)
 - [x] Servei Railway `web` creat des de GitHub, dominis afegits (pendent DNS al registrador)
+- [ ] `GOOGLE_CLIENT_SECRET` a Railway (sense això no hi ha entrada amb Google ni panell de docent)
+- [ ] Fase 2: alta de centres, panell de superadmin complet, panell d'alumne
 - [ ] DNS undirlaflota.cat al registrador

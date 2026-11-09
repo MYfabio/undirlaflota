@@ -4,6 +4,7 @@
  */
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE, buildSession, cookieOptions, encodeSession } from "@/lib/auth";
+import { roleForEmail } from "@/lib/roles";
 import { GOOGLE_STATE_COOKIE, checkState, exchangeCode, googleConfig, playerForGoogle } from "@/lib/google";
 
 export async function GET(req: Request) {
@@ -25,8 +26,9 @@ export async function GET(req: Request) {
     const domain = user.email.split("@")[1];
     if (c.hostedDomain && domain !== c.hostedDomain) return fail("google-domain");
     const { player, classroom } = await playerForGoogle(user);
-    const session = buildSession(classroom, player);
-    const res = NextResponse.redirect(`${site}/login`);
+    const session = buildSession(classroom, player, user.email);
+    const { role } = await roleForEmail(user.email);
+    const res = NextResponse.redirect(`${site}${role === "student" ? "/login" : "/docent"}`);
     res.cookies.set(SESSION_COOKIE, encodeSession(session), cookieOptions());
     res.cookies.set(GOOGLE_STATE_COOKIE, "", { path: "/", maxAge: 0 });
     return res;

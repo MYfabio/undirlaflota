@@ -74,6 +74,17 @@ create table if not exists scores (
   unique (game_id, player_id)
 );
 create index if not exists scores_code_idx on scores(code_id);
+alter table classroom_codes add column if not exists owner_email text;
+create index if not exists classroom_codes_owner_idx on classroom_codes(owner_email);
+create table if not exists users (
+  email text primary key,
+  name text not null default '',
+  role text not null default 'teacher',
+  status text not null default 'pending' check (status in ('pending','active','rejected')),
+  created_at timestamptz not null default now(),
+  decided_by text,
+  decided_at timestamptz
+);
 insert into classroom_codes (code, school, course, teacher, expires_at)
 values ('ESO3A-2026', 'Institut Escola Industrial', '3r ESO A', 'Fabio', now() + interval '1 year')
 on conflict (code) do nothing;

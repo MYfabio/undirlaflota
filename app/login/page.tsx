@@ -20,6 +20,7 @@ function LoginInner() {
   const params = useSearchParams();
   const { t } = useT();
   const [google, setGoogle] = useState(false);
+  const [role, setRole] = useState("student");
   const [code, setCode] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +29,7 @@ function LoginInner() {
   const [codeInfo, setCodeInfo] = useState<{ school: string; course: string } | null>(null);
 
   useEffect(() => {
-    fetch("/api/auth/login").then((r) => r.json()).then((d) => { setSession(d.session); setGoogle(Boolean(d.google)); }).catch(() => {});
+    fetch("/api/auth/login").then((r) => r.json()).then((d) => { setSession(d.session); setGoogle(Boolean(d.google)); setRole(d.role ?? "student"); }).catch(() => {});
     const e = params.get("error");
     if (e) setError(t(`login.err.${e}`));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,6 +104,7 @@ function LoginInner() {
                   </a>
                 </>
               )}
+              <Link href="/docent" className="block text-center text-xs text-mar-300/70 underline">{t("login.amTeacher")}</Link>
             </form>
           ) : (
             <div className="space-y-5">
@@ -114,7 +116,9 @@ function LoginInner() {
                 <button className="btn-primary" onClick={() => router.push("/game?resume=1")}>{t("login.resume")}</button>
                 <button className="btn-success" onClick={() => router.push("/game?mode=new")}>{t("login.new")}</button>
                 <button className="btn-secondary" onClick={() => router.push("/game?mode=tutorial")}>{t("login.tutorial")}</button>
+                {role !== "student" && <button className="btn-secondary" onClick={() => router.push("/docent")}>{t("login.teacherPanel")}</button>}
               </div>
+              {role === "student" && <Link href="/docent" className="block text-center text-xs text-mar-300/70 underline">{t("login.amTeacher")}</Link>}
               <button onClick={logout} className="w-full text-center text-xs text-mar-300/70 underline">{t("login.logout")}</button>
             </div>
           )}

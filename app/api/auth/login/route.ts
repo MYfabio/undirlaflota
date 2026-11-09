@@ -15,6 +15,7 @@ import {
   upsertPlayer,
 } from "@/lib/auth";
 import { googleConfig } from "@/lib/google";
+import { roleForEmail } from "@/lib/roles";
 
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as { code?: string; username?: string };
@@ -39,7 +40,14 @@ export async function POST(req: Request) {
 
 export async function GET() {
   const s = await getSession();
-  return NextResponse.json({ session: s ? { ...s, exp: undefined } : null, google: googleConfig().enabled });
+  const { role, teacherStatus } = await roleForEmail(s?.email).catch(() => ({ role: "student" as const, teacherStatus: "none" as const }));
+  return NextResponse.json({
+    session: s ? { ...s, exp: undefined, email: undefined } : null,
+    google: googleConfig().enabled,
+    role,
+    teacherStatus,
+    viaGoogle: Boolean(s?.email),
+  });
 }
 
 export async function DELETE() {

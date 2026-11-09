@@ -24,6 +24,8 @@ export interface Session {
   school: string;
   course: string;
   teacher: string;
+  /** Només amb entrada per Google: serveix per calcular el rol (lib/roles.ts). */
+  email?: string;
   exp: number;
 }
 
@@ -110,7 +112,7 @@ export function decodeSession(token: string | undefined): Session | null {
   }
 }
 
-export function buildSession(codeRow: ClassroomCodeRow, player: { id: string; username: string }): Session {
+export function buildSession(codeRow: ClassroomCodeRow, player: { id: string; username: string }, email?: string): Session {
   return {
     playerId: player.id,
     username: player.username,
@@ -119,6 +121,7 @@ export function buildSession(codeRow: ClassroomCodeRow, player: { id: string; us
     school: codeRow.school,
     course: codeRow.course,
     teacher: codeRow.teacher,
+    ...(email ? { email: email.toLowerCase() } : {}),
     exp: Date.now() + SESSION_DAYS * 86400_000,
   };
 }
