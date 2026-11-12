@@ -117,6 +117,27 @@ export async function queryOne<T extends QueryResultRow = QueryResultRow>(sql: s
   return rows[0] ?? null;
 }
 
+type Tx = { query: <T extends QueryResultRow = QueryResultRow>(sql: string, params?: unknown[]) => Promise<T[]> };
+
+/** Executa `fn` dins d'una transacció (ROLLBACK si llança). Sense BD no fa res i retorna null. */
+export async function withTransaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T | null> {
+  const p = getPool();
+  if (!p) return null;
+  await ensureSchema();
+  const client = await p.connect();
+  try {
+    await client.query("begin");
+    const out = await fn({ query: async (sql, params = []) => (await client.query(sql, params)).rows });
+    await client.query("commit");
+    return out;
+  } catch (e) {
+    await client.query("rollback").catch(() => undefined);
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
 /* Tipus de les taules */
 export interface ClassroomCodeRow {
   id: string;

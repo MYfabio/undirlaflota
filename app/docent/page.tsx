@@ -61,6 +61,9 @@ export default function DocentPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [newEmail, setNewEmail] = useState("");
+  const [newName, setNewName] = useState("");
+  const [accountMsg, setAccountMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   const staff = me?.role === "teacher" || me?.role === "superadmin";
 
@@ -127,6 +130,29 @@ export default function DocentPage() {
   async function decide(email: string, status: "active" | "rejected") {
     await fetch("/api/teacher/requests", { method: "PATCH", body: JSON.stringify({ email, status }) });
     loadRequests();
+  }
+
+  async function createTeacher(e: React.FormEvent) {
+    e.preventDefault();
+    setAccountMsg(null);
+    const r = await fetch("/api/teacher/accounts", { method: "POST", body: JSON.stringify({ email: newEmail, name: newName }) });
+    const d = (await r.json().catch(() => ({}))) as { error?: string };
+    if (!r.ok) return setAccountMsg({ ok: false, text: t(`teacher.accountErr.${d.error ?? "invalid"}`) });
+    setAccountMsg({ ok: true, text: t("teacher.accountCreated", { email: newEmail.trim().toLowerCase() }) });
+    setNewEmail("");
+    setNewName("");
+    loadRequests();
+  }
+
+  async function removeTeacher(r: Request) {
+    if (!window.confirm(t("teacher.confirmDelete", { email: r.email, n: r.classes }))) return;
+    setAccountMsg(null);
+    const res = await fetch("/api/teacher/accounts", { method: "DELETE", body: JSON.stringify({ email: r.email, confirm: true }) });
+    const d = (await res.json().catch(() => ({}))) as { error?: string; classes?: number };
+    if (!res.ok) return setAccountMsg({ ok: false, text: t(`teacher.accountErr.${d.error ?? "invalid"}`) });
+    setAccountMsg({ ok: true, text: t("teacher.accountDeleted", { email: r.email, n: d.classes ?? 0 }) });
+    loadRequests();
+    loadClasses();
   }
 
   async function requestAccess() {
@@ -198,11 +224,25 @@ export default function DocentPage() {
                         <div className="flex gap-2">
                           {r.status !== "active" && <button className="btn-success !px-3 !py-2 text-sm" onClick={() => decide(r.email, "active")}>{t("teacher.approve")}</button>}
                           {r.status !== "rejected" && <button className="btn-secondary !px-3 !py-2 text-sm" onClick={() => decide(r.email, "rejected")}>{t(r.status === "active" ? "teacher.revoke" : "teacher.reject")}</button>}
+                          <button className="btn-secondary !px-3 !py-2 text-sm text-perill" onClick={() => removeTeacher(r)}>{t("teacher.delete")}</button>
                         </div>
                       </li>
                     ))}
                   </ul>
                 )}
+                <form onSubmit={createTeacher} className="mt-6 grid gap-3 border-t border-mar-300/10 pt-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                  <p className="text-sm text-mar-100/75 sm:col-span-3"><strong>{t("teacher.newTeacher")}</strong> · {t("teacher.newTeacherHint")}</p>
+                  <label className="block">
+                    <span className="text-sm font-bold">{t("teacher.email")}</span>
+                    <input className="input mt-1" type="email" required maxLength={254} value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="nom.cognom@centre.cat" />
+                  </label>
+                  <label className="block">
+                    <span className="text-sm font-bold">{t("teacher.name")}</span>
+                    <input className="input mt-1" maxLength={120} value={newName} onChange={(e) => setNewName(e.target.value)} />
+                  </label>
+                  <button className="btn-primary" type="submit">{t("teacher.addTeacher")}</button>
+                </form>
+                {accountMsg && <p role={accountMsg.ok ? "status" : "alert"} className={`mt-3 text-sm ${accountMsg.ok ? "text-mar-100" : "text-perill"}`}>{accountMsg.text}</p>}
               </section>
             )}
 
