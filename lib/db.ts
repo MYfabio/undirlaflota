@@ -85,6 +85,14 @@ create table if not exists users (
   decided_by text,
   decided_at timestamptz
 );
+create table if not exists enllacos_acces (
+  token_hash text primary key,
+  email text not null,
+  expira timestamptz not null,
+  usat_el timestamptz,
+  creat_el timestamptz not null default now()
+);
+create index if not exists enllacos_acces_email_idx on enllacos_acces(email, creat_el);
 insert into classroom_codes (code, school, course, teacher, expires_at)
 values ('ESO3A-2026', 'Institut Escola Industrial', '3r ESO A', 'Fabio', now() + interval '1 year')
 on conflict (code) do nothing;

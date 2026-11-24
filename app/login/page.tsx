@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { useT } from "@/components/LangProvider";
+import EnllacDocent from "@/components/EnllacDocent";
 
 type SessionInfo = { username: string; code: string; school: string; course: string } | null;
 
@@ -123,6 +124,7 @@ function LoginInner() {
             </div>
           )}
         </motion.div>
+        <EnllacDocent ambSessio={Boolean(session)} />
       </main>
       <SiteFooter />
     </>

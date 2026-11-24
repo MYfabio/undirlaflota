@@ -113,3 +113,9 @@ npm run build
 - [ ] `GOOGLE_CLIENT_SECRET` a Railway (sense això no hi ha entrada amb Google ni panell de docent)
 - [ ] Fase 2: alta de centres, panell de superadmin complet, panell d'alumne
 - [ ] DNS undirlaflota.cat al registrador
+
+## Docents d'altres centres
+
+- Entren amb un enllaç per correu (`/login` → «Ets docent d'un altre centre?»), només si ja són docents validats (taula `users` o variables). L'enllaç és d'un sol ús i caduca en 20 minuts; s'envia pel servei central d'aulaia.cat (`CORREU_API_KEY`, app `enfonsar-la-flota`).
+- Cada docent només veu les classes que ha creat ell (`classroom_codes.owner_email`). Qui entra per enllaç no és jugador de cap classe.
+- `POST /api/alta-compte`: quan el propietari valida una sol·licitud a aulaia.cat, n8n envia una ordre signada (`X-Aulaia-Signature`, `AULAIA_WEBHOOK_SECRET`) i l'app fa l'alta prèvia del docent i li envia el correu «Ja tens compte» amb un primer enllaç (7 dies). Contracte: `docs/alta-compte-automatica.md` al repo d'aulaia.cat.
