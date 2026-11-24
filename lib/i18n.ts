@@ -76,6 +76,22 @@ const ca: Dict = {
   "landing.ctaLogin": "Entra amb codi de classe",
   "landing.ctaTeacher": "🎓 Soc docent: entra amb Google",
   "landing.ctaAlta": "El teu centre encara no hi és? Demana'n l'alta",
+  // Preguntes de la portada (les mateixes que el JSON-LD de app/page.tsx)
+  "landing.whatIs": "Què és Enfonsar la flota?",
+  "landing.whatIsText": "Enfonsar la flota (Undirlaflota) és un joc de batalla naval en 3D per aprendre coordenades cartesianes i sistema dièdric. El mar és un bloc de 10 × 10 × 5: avions a l'aire, vaixells a la superfície i submarins sota l'aigua. Cada tret és un punt (x, y, z), i planta, alçat i perfil es veuen en viu.",
+  "landing.forWho": "Per a qui és?",
+  "landing.forWhoText": "És per a l'alumnat de 3r i 4t d'ESO i per als docents de Matemàtiques i de Dibuix tècnic que treballen la geometria a l'espai i les vistes ortogonals; també serveix a Batxillerat. L'alumnat juga amb un codi de classe, i el docent crea les classes i en segueix el progrés des del panell de docent.",
+  "landing.faq": "Preguntes freqüents",
+  "landing.faq1.q": "Cal crear comptes a l'alumnat?",
+  "landing.faq1.a": "No. L'alumnat entra amb el codi de classe que li dona el docent i un nom, sense correu ni contrasenya.",
+  "landing.faq2.q": "Es pot jugar sense codi de classe?",
+  "landing.faq2.a": "Sí. Sense codi es pot fer el tutorial, jugar contra l'ordinador o jugar a dos al mateix dispositiu, però les partides no es guarden. El mode en línia amb la classe sí que necessita codi.",
+  "landing.faq3.q": "Com aconsegueix el docent un codi de classe?",
+  "landing.faq3.a": "Entra al panell de docent amb el compte de Google del centre. Quan té l'accés de docent validat, crea la classe i es genera un codi únic, vàlid un any. Si el centre encara no hi és, en pot demanar l'alta a aulaia.cat.",
+  "landing.faq4.q": "Quanta munició té cada jugador?",
+  "landing.faq4.a": "20 torpedes, que toquen la superfície i sota l'aigua, i 10 atacs aeris, que toquen la superfície i l'aire. Amb la munició limitada, disparar a l'atzar no funciona: cal pensar patrons de cerca.",
+  "landing.faq5.q": "En quins idiomes està?",
+  "landing.faq5.a": "En català, castellà i anglès. L'idioma es canvia amb el selector de la capçalera.",
 
   // Login
   "login.title": "Entra a la flota",
@@ -481,6 +497,21 @@ const es: Dict = {
   "landing.ctaLogin": "Entra con código de clase",
   "landing.ctaTeacher": "🎓 Soy docente: entrar con Google",
   "landing.ctaAlta": "¿Tu centro aún no está? Solicita el alta",
+  "landing.whatIs": "¿Qué es Enfonsar la flota?",
+  "landing.whatIsText": "Enfonsar la flota (Undirlaflota) es un juego de batalla naval en 3D para aprender coordenadas cartesianas y sistema diédrico. El mar es un bloque de 10 × 10 × 5: aviones en el aire, barcos en la superficie y submarinos bajo el agua. Cada disparo es un punto (x, y, z), y planta, alzado y perfil se ven en vivo.",
+  "landing.forWho": "¿Para quién es?",
+  "landing.forWhoText": "Es para el alumnado de 3º y 4º de ESO y para los docentes de Matemáticas y de Dibujo técnico que trabajan la geometría en el espacio y las vistas ortogonales; también sirve en Bachillerato. El alumnado juega con un código de clase, y el docente crea las clases y sigue su progreso desde el panel de docente.",
+  "landing.faq": "Preguntas frecuentes",
+  "landing.faq1.q": "¿Hay que crear cuentas al alumnado?",
+  "landing.faq1.a": "No. El alumnado entra con el código de clase que le da el docente y un nombre, sin correo ni contraseña.",
+  "landing.faq2.q": "¿Se puede jugar sin código de clase?",
+  "landing.faq2.a": "Sí. Sin código se puede hacer el tutorial, jugar contra el ordenador o jugar a dos en el mismo dispositivo, pero las partidas no se guardan. El modo en línea con la clase sí necesita código.",
+  "landing.faq3.q": "¿Cómo consigue el docente un código de clase?",
+  "landing.faq3.a": "Entra en el panel de docente con la cuenta de Google del centro. Cuando tiene validado el acceso de docente, crea la clase y se genera un código único, válido un año. Si el centro aún no está, puede solicitar el alta en aulaia.cat.",
+  "landing.faq4.q": "¿Cuánta munición tiene cada jugador?",
+  "landing.faq4.a": "20 torpedos, que alcanzan la superficie y bajo el agua, y 10 ataques aéreos, que alcanzan la superficie y el aire. Con munición limitada, disparar al azar no funciona: hay que pensar patrones de búsqueda.",
+  "landing.faq5.q": "¿En qué idiomas está?",
+  "landing.faq5.a": "En catalán, castellano e inglés. El idioma se cambia con el selector de la cabecera.",
   "login.title": "Entra en la flota",
   "login.subtitle": "Con el código que te ha dado el docente.",
   "login.code": "Código de clase",
@@ -870,6 +901,21 @@ const en: Dict = {
   "landing.ctaLogin": "Sign in with class code",
   "landing.ctaTeacher": "🎓 I am a teacher: sign in with Google",
   "landing.ctaAlta": "Is your school not here yet? Request access",
+  "landing.whatIs": "What is Enfonsar la flota?",
+  "landing.whatIsText": "Enfonsar la flota (Undirlaflota) is a three-dimensional battleship game for learning Cartesian coordinates and orthographic projection. The sea is a 10 × 10 × 5 block: planes in the air, ships on the surface and submarines underwater. Every shot is a point (x, y, z), and the top, front and side views are shown live.",
+  "landing.forWho": "Who is it for?",
+  "landing.forWhoText": "It is for students aged 14 to 16 and for maths and technical drawing teachers working on geometry in space and orthogonal views; it also works in upper secondary. Students play with a class code, and the teacher creates the classes and follows their progress from the teacher panel.",
+  "landing.faq": "Frequently asked questions",
+  "landing.faq1.q": "Do students need accounts?",
+  "landing.faq1.a": "No. Students sign in with the class code their teacher gives them and a name, with no email or password.",
+  "landing.faq2.q": "Can you play without a class code?",
+  "landing.faq2.a": "Yes. Without a code you can do the tutorial, play against the computer or play two players on the same device, but games are not saved. Online play with the class does need a code.",
+  "landing.faq3.q": "How does a teacher get a class code?",
+  "landing.faq3.a": "They open the teacher panel with their school Google account. Once their teacher access is approved, they create a class and a unique code is generated, valid for one year. If the school is not here yet, it can request access at aulaia.cat.",
+  "landing.faq4.q": "How much ammunition does each player have?",
+  "landing.faq4.a": "20 torpedoes, which reach the surface and underwater, and 10 air strikes, which reach the surface and the air. With limited ammunition, firing at random does not work: you need to think about search patterns.",
+  "landing.faq5.q": "Which languages is it available in?",
+  "landing.faq5.a": "Catalan, Spanish and English. You can change the language with the selector in the header.",
   "login.title": "Join the fleet",
   "login.subtitle": "With the code your teacher gave you.",
   "login.code": "Class code",
@@ -1204,6 +1250,9 @@ const en: Dict = {
 };
 
 export const DICTS: Record<Lang, Dict> = { ca, es, en };
+
+/** Preguntes freqüents visibles de la portada; app/page.tsx en fa el JSON-LD amb les mateixes claus. */
+export const FAQ_CLAUS = ["faq1", "faq2", "faq3", "faq4", "faq5"] as const;
 
 export function isLang(x: unknown): x is Lang {
   return x === "ca" || x === "es" || x === "en";

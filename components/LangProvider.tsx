@@ -30,6 +30,9 @@ export default function LangProvider({ children, initial }: { children: React.Re
       if (fromCookie !== lang) setLangState(fromCookie);
       return;
     }
+    // Els robots de cerca no tenen cookie: es queden amb l'idioma que ha pintat el servidor,
+    // perquè el text indexat coincideixi amb l'HTML, el lang i les dades estructurades.
+    if (/bot|crawl|spider|slurp|preview/i.test(navigator.userAgent)) return;
     const detected = detectLang();
     if (detected !== lang) setLangState(detected);
     document.cookie = `${LANG_COOKIE}=${detected}; path=/; max-age=31536000; samesite=lax`;
