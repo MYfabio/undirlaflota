@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { isDbConfigured, query } from "@/lib/db";
 import { requireStaff, roleForEmail } from "@/lib/roles";
+import { dominiDe, enviarAvis, rolComu } from "@/lib/avisos";
 
 export async function POST() {
   const session = await getSession();
@@ -17,7 +18,8 @@ export async function POST() {
   const current = await roleForEmail(session.email);
   if (current.role !== "student") return NextResponse.json({ teacherStatus: "active" });
   // Una sol·licitud rebutjada no es torna a obrir sola: "do nothing" conserva l'estat.
-  await query("insert into users (email, name) values ($1, $2) on conflict (email) do nothing", [session.email.toLowerCase(), session.username]);
+  const nova = await query("insert into users (email, name) values ($1, $2) on conflict (email) do nothing returning email", [session.email.toLowerCase(), session.username]);
+  if (nova.length) void enviarAvis({ tipus: "alta.solicitud", centre: dominiDe(session.email), datos: { rol: rolComu("docent") } });
   const after = await roleForEmail(session.email);
   return NextResponse.json({ teacherStatus: after.teacherStatus });
 }
@@ -41,7 +43,14 @@ export async function PATCH(req: Request) {
   const body = (await req.json().catch(() => ({}))) as { email?: string; status?: string };
   const email = String(body.email ?? "").trim().toLowerCase();
   if (!email || (body.status !== "active" && body.status !== "rejected")) return NextResponse.json({ error: "invalid" }, { status: 400 });
-  const rows = await query("update users set status = $2, decided_by = $3, decided_at = now() where email = $1 returning email", [email, body.status, staff.email]);
+  const rows = await query(
+    "update users u set status = $2, decided_by = $3, decided_at = now() from (select email, status as abans from users where email = $1) a where u.email = a.email returning a.abans",
+    [email, body.status, staff.email],
+  );
   if (!rows.length) return NextResponse.json({ error: "No trobat" }, { status: 404 });
+  // Només quan canvia de debò: validar una sol·licitud = alta; treure l'accés a un docent actiu = baixa.
+  const abans = (rows[0] as { abans?: string }).abans;
+  if (body.status === "active" && abans !== "active") void enviarAvis({ tipus: "alta.validada", centre: dominiDe(email), datos: { rol: rolComu("docent") } });
+  if (body.status === "rejected" && abans === "active") void enviarAvis({ tipus: "baixa", centre: dominiDe(email), datos: { rol: rolComu("docent") } });
   return NextResponse.json({ ok: true });
 }

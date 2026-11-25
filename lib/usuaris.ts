@@ -8,6 +8,7 @@
  * (`classroom_codes.owner_email`, sense FK).
  */
 import { query, withTransaction } from "./db";
+import { dominiDe, enviarAvis, rolComu } from "./avisos";
 
 const CORREU = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -28,6 +29,8 @@ export async function altaPreviaDocent(email: string, nom: string, decidedBy: st
      on conflict (email) do nothing returning email`,
     [email, nom.trim().slice(0, 120), decidedBy],
   );
+  // Avís a aulaia.cat (només el domini del correu i el rol, mai el correu sencer).
+  if (rows.length > 0) void enviarAvis({ tipus: "alta.validada", centre: dominiDe(email), datos: { rol: rolComu("docent") } });
   return { creat: rows.length > 0 };
 }
 
@@ -44,5 +47,6 @@ export async function baixaDocent(email: string, transferTo: string): Promise<{ 
     await tx.query("delete from users where email = $1", [email]);
     return { esborrat: true, classesTransferides: classes.length };
   });
+  if (out?.esborrat) void enviarAvis({ tipus: "baixa", centre: dominiDe(email), datos: { rol: rolComu("docent") } });
   return out ?? { esborrat: false, classesTransferides: 0 };
 }
